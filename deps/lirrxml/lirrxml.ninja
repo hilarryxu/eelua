@@ -1,0 +1,11 @@
+basedir = $rootdir/deps/lirrxml
+outputdir = $rootdir/eelua
+
+build $builddir/irrXML.o: cxx $basedir/irrXML.cpp
+build $builddir/lirrxml.o: cxx $basedir/lirrxml.cpp
+  cxxflags_ = -I$rootdir/deps/auxiliar
+
+build $outputdir/lirrxml.dll: cxx_dlink $builddir/irrXML.o $builddir/lirrxml.o | $builddir/libauxiliar.a
+  libs =  -lauxiliar -llua
+
+build lirrxml: phony $outputdir/lirrxml.dll

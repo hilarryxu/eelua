@@ -1,0 +1,5 @@
+basedir = $rootdir/deps/auxiliar
+
+build $builddir/auxiliar.o: cc $basedir/auxiliar.c
+
+build $builddir/libauxiliar.a: ar $builddir/auxiliar.o

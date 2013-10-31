@@ -1,0 +1,9 @@
+basedir = $rootdir/deps/lpeg
+outputdir = $rootdir/eelua
+
+build $builddir/lpeg.o: cc $basedir/lpeg.c
+
+build $outputdir/lpeg.dll: cc_dlink $builddir/lpeg.o
+  libs = -llua
+
+build lpeg: phony $outputdir/lpeg.dll

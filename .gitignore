@@ -1,18 +1,8 @@
-# Object files
-*.o
-*.ko
+build
+eelua/*.dll
+src/scripts.cc
+eelua.dll
 
-# Libraries
-*.lib
-*.a
+.hg
+.hgignore
 
-# Shared objects (inc. Windows DLLs)
-*.dll
-*.so
-*.so.*
-*.dylib
-
-# Executables
-*.exe
-*.out
-*.app
