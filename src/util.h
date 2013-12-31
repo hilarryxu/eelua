@@ -8,8 +8,6 @@
 
 #include <string>
 
-#include <windows.h>
-
 #include "config.h"
 
 void LoggerImpl(const char* domain, int level, const char* fmt, ...);

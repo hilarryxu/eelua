@@ -6,6 +6,10 @@
 #ifndef EELUA_CONFIG_H_
 #define EELUA_CONFIG_H_
 
+#include <windows.h>
+
+#include "eesdk.h"
+
 #ifdef _MSC_VER
 #define snprintf _snprintf
 #define PATH_MAX _MAX_PATH

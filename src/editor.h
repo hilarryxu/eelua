@@ -6,14 +6,14 @@
 #ifndef EELUA_EDITOR_H_
 #define EELUA_EDITOR_H_
 
+#include "config.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 #include "lua.h"
 #include "lauxlib.h"
-
-struct EE_Context;
 
 int editor_open(lua_State* L, EE_Context* context);
 

@@ -241,7 +241,7 @@ static t_eelua_hook hooks[] = {
   {"", EEHOOK_PRETRANSLATEMSG, NULL},
   {"", EEHOOK_APPRESIZE, NULL},
   {"appactivate", EEHOOK_APPACTIVATE, (LPVOID) HookAppActivate},
-  {"", EEHOOK_CHILDACTIVE, NULL},
+  {"", EEHOOK_CHILDACTIVATE, NULL},
   {"runcommand", EEHOOK_RUNCOMMAND, (LPVOID) HookRunCommand},
   {"preload", EEHOOK_PRELOAD, (LPVOID) HookPreLoad},
   {"postload", EEHOOK_POSTLOAD, (LPVOID) HookPostLoad},
@@ -255,7 +255,6 @@ static t_eelua_hook hooks[] = {
   {"", EEHOOK_PREWORDCOMPLETE, NULL},
   {"", EEHOOK_POSTWORDCOMPLETE, NULL},
   {"closewordcomplete", EEHOOK_CLOSEWORDCOMPLETE, (LPVOID) HookCloseWordcomplete},
-  {"", EEHOOK_HEXCHAR, NULL},
   {NULL, 0, NULL}
 };
 

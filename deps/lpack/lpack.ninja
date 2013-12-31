@@ -1,9 +1,0 @@
-basedir = $rootdir/deps/lpack
-outputdir = $rootdir/eelua
-
-build $builddir/lpack.o: cc $basedir/lpack.c
-
-build $outputdir/lpack.dll: cc_dlink $builddir/lpack.o
-  libs = -llua
-
-build lpack: phony $outputdir/lpack.dll

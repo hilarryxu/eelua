@@ -1,276 +1,511 @@
-// SDK for EverEdit
-// Copyright ?2011-2013 everedit.net, All Rights Reserved.
-//
-// 插件最少需要实现EE_PluginInit, 否则不加载
-// DWORD EE_PluginInit(EE_Context* pContext);
-// DWORD EE_PluginUninit();
-// DWORD EE_PluginInfo(wchar_t* lpText, int nLength);
-////////////////////////////////////////////////////////////////////////////////
-
-/*******************************************************************************
+/********************************************************************************
+ * SDK for EverEdit
+ * Copyright 2011-2013 everedit.net, All Rights Reserved.
+ *
+ * Plugin must implement the below functions
+ *
+ * DWORD EE_PluginInit(EE_Context* pContext);
+ * DWORD EE_PluginUninit();
+ * DWORD EE_PluginInfo(wchar_t* lpText, int nLength);
+ *
+ * Version: 1.1
+ *
+ *
  * 2013/01/10 First Version
-*******************************************************************************/
+ * 2013/11/12 Update for EverEdit 3.0
+********************************************************************************/
 
 #ifndef __EESDK_HPP__
 #define __EESDK_HPP__
 
 #include "eecore.h"
 
-//******************************************************************************
-// Messages
+/**
+ * @Msg:    Restore layout of docking windows. This message will be sent from EE on startup, DO NOT send this message to EE!
+ * @Return: HWND: If plugin has a docking window, it should return a HWND handle, otherwise EE will not update its layout.
+ * @wparam: const wchar_t*: Caption of docking window. Plugin can restore itself by this param.
+**/
+#define EEM_RESOTREDOCKINGWINDOW    WM_USER+1211
 
 /**
- * @Return: (HWND)获取当前激活的文本文档
- */
+ * @Msg:    Preview a file with built-in browser.
+ * @wparam: WebPreviewData*
+**/
+#define EEM_WEBPREVIEW              WM_USER+1220
+
+/**
+ * @Msg:	Get handle of active document(Text mode). If current view was divided, it will return the activated one.
+ * @Return: HWND
+**/
 #define EEM_GETACTIVETEXT           WM_USER+3000
 
 /**
- * @Return: (HWND)获取当前激活的HEX文档
- */
+ * @Msg:	Get handle of active hex document(Hex Mode)
+ * @Return: HWND
+**/
 #define EEM_GETACTIVEHEX            WM_USER+3001
 
 /**
- * @Msg:    打开指定的文件
- * @Return: (HWND)显示该文件的窗口
- * @wparam: (const wchar_t*)文件的全路径
- * @lparam: (EE_LoadFile)
- */
+ * @Msg:    Open a file
+ * @Return: HWND: return the handle of opened file
+ * @wparam: const wchar_t*: full path of file
+ * @lparam: EE_LoadFile*
+**/
 #define EEM_LOADFILE                WM_USER+3002
 
 /**
- * @Msg:    设定各种回调函数,可以用于添加/删除Hook
- * @Return: (int)回调函数总数
- * @wparam: (int)回调函数的枚举值
- * @lparam: (LPVOID)回调函数地址
- */
+ * @Msg:    Manage callback functions. Plugin can Add/Remove callbacks
+ * @Return: int: Total callbacks
+ * @wparam: int: Type of callback
+ * @lparam: LPVOID: Address of callback function
+**/
 #define EEM_SETHOOK                 WM_USER+3003
 
 /**
- * @Msg:    添加DockingWindow
- * @Return: (BOOL)
- * @wparam: (BOOL)true:添加,false:删除
+ * @Msg:    Manage a dockingWindow
+ * @Return: BOOL: Return true if success
+ * @wparam: int: Action
+ *          1: Add
+ *			2: Hide
+ *			3: Activate
  * @lparam: (EE_DockingWindow*)
- */
+**/
 #define EEM_DOCKINGWINDOW           WM_USER+3004
 
 /**
- * @Msg:    添加/删除/更新界面元素状态
- * @Return: (void)
- * @wparam: (int)命令
- * @lparam: (EE_UpdateUIElement*)元素状态,其中nUpdate必须指定
- */
+ * @Msg:    Update UI element's state(Check/Uncheck/Disable/Enable). UI elements are menu/button items.
+ * @Return: void
+ * @wparam: int: ID of UI element
+ * @lparam: EE_UpdateUIElement*: You must set a valid value for nAction
+**/
 #define EEM_UPDATEUIELEMENT         WM_USER+3004
 
 /**
- * @Msg:    获取一个列表,该列表包含所有的text窗口的句柄,注意:调用者必须手工销毁(delete[] list)
- * @Return: (HWND*)列表首地址
- * @wparam: (int*)接受个数的地址
- */
+ * NOT IMPLEMENTED!
+ * @Msg:    Get a array which includes all handle of text document. Plugin should destroy this array after use
+ * @Return: HWND*: head address of this vector
+ * @wparam: int*: An integer to receive the size
+**/
 #define EEM_GETHWNDLIST             WM_USER+3005
 
 /**
- * @Msg:    激活一个子视图窗口
- * @Return: (BOOL)True:该窗口存在且被成功设置为激活, 否则为:False
- * @wparam: (HWND子窗口的句柄
- */
+ * NOT IMPLEMENTED!
+ * @Msg:    Activate a child window
+ * @Return: BOOL: Return true if this window does exist and be activated, otherwise return false
+ * @wparam: HWND: Windows' handle
+**/
 #define EEM_SETACTIVEVIEW           WM_USER+3006
 
 /**
- * @Msg:    批量添加各种回调函数
- * @Return: (int)回调函数总数
- * @wparam: (int)数组起始地址(EE_HookFunc*)
- * @lparam: (int)数组个数
- */
+ * @Msg:    Add multiple callbacks
+ * @Return: int: Total callbacks
+ * @wparam: EE_HookFunc*: Address of callback array
+ * @lparam: int: array's size
+**/
 #define EEM_SETHOOKS                WM_USER+3007
 
 
 /**
- * @Msg:    恢复DockingWindow的位置信息. 该消息在启动时由系统自动发送, 用户不可调用!
- * @Return: (HWND)返回有效的窗口信息
- * @wparam: (const wchar_t*)该DockingWindow的Caption
- */
-#define EEM_RESOTREDOCKINGWINDOW    WM_USER+1211
+ * @Msg:    Get default UI font of EverEdit
+ * @Return: HFONT: Font's handle. DO NOT destroy this handle!
+**/
+#define EEM_GETUIFONT               WM_USER+3008
 
 
-//******************************************************************************
-
-// EE_LoadFile.nViewType
+/**
+ * EE_LoadFile.nViewType
+**/
 #define WT_UNKNOWN                    0
 #define WT_TEXT                       1
 #define WT_HEX                        2
 
-//EE_UpdateUIElementn.Action
+/**
+ * EE_UpdateUIElementn.Action
+**/
 #define EE_UI_REMOVE                  0
 #define EE_UI_ADD                     1
 #define EE_UI_ENABLE                  2
 #define EE_UI_SETCHECK                3
 
-//******************************************************************************
-// 各种回调函数原型说明
-
-// 删除指定的回调函数
+/**
+ * Remove a callback
+**/
 #define EEHOOK_REMOVE                 0
 
-// int(HWND, HMENU, int, int)
+/**
+ * @Prototype:int OnPopupTextMenu(HWND hWnd, HWND hMenu, int x, int y )
+ * @Vars:
+ *		hWnd: 	Handle of current document
+ *		hMenu: 	Handle of context menu
+ *		x: 		mouse position x
+ *		y: 		mouse position y
+ *
+ * Called on popuping context menu of text document. Plugin can add/remove menu items here.
+ * The command id of menu item should be retrieved from EE_Context.
+**/
 #define EEHOOK_TEXTMENU               1
 
-// int(HWND, HMENU, int, int)
+/**
+ * @Prototype:int OnPopupHexMenu(HWND hWnd, HWND hMenu, int x, int y )
+ * @Vars:
+ *		hWnd: 	Handle of current document
+ *		hMenu: 	Handle of context menu
+ *		x: 		mouse position x
+ *		y: 		mouse position y
+ *
+ * Called on popuping context menu of hex document. Plugin can add/remove menu items here
+ * The command id of menu item should be retrieved from EE_Context.
+**/
 #define EEHOOK_HEXMENU                2
 
-// int(HWND)
+/**
+ * @Prototype:int OnPreSaveFile(HWND hWnd)
+ * @Vars:
+ *		hWnd: 	Handle of current document
+ *
+ * Called before saving a document
+**/
 #define EEHOOK_PRESAVE                3
 
-// int(HWND)
+/**
+ * @Prototype:int OnPostSaveFile(HWND hWnd)
+ * @Vars:
+ *		hWnd: 	Handle of current document
+ *
+ * Called after saving a document
+**/
 #define EEHOOK_POSTSAVE               4
 
-// int(HWND)
+/**
+ * @Prototype:int OnPreCloseFile(HWND hWnd)
+ * @Vars:
+ *		hWnd: 	Handle of current document
+ *
+ * Called before closing a document
+**/
 #define EEHOOK_PRECLOSE               5
 
-// int(HWND)
+/**
+ * @Prototype:int OnPostCloseFile(HWND hWnd)
+ * @Vars:
+ *		hWnd: 	Handle of current document
+ *
+ * Called after closing a document
+**/
 #define EEHOOK_POSTCLOSE              6
 
-// int(HWND, WPARAM, LPARAM)
+/**
+ * @Prototype:int OnAppMessage(UINT uMsg, WPARM wp, LPARAM lp)
+ * @Vars:
+ *		uMsg: 	Message's ID
+ *
+ * Translate and Dispatch messages. Plugin can hook this function and monitor messages.
+**/
 #define EEHOOK_APPMSG                 7
 
-// int(HWND)
+/**
+ * @Prototype:int OnIdle(HWND hWnd)
+ * @Vars:
+ *		hWnd: 	Handle of main frame
+ *
+ * Idle message. Plugin can update UI element's state here! DO NOT do complicated operations in this hook!
+**/
 #define EEHOOK_IDLE                   8
 
-// int(MSG*)
+/**
+ * @Prototype:int OnPreTranslateMsg(MSG* pMsg)
+ * @Vars:
+ *		MSG*: 	See MSDN to get details about struct MSG
+ *
+ * Plugin can monitor messages before dispatching.
+**/
 #define EEHOOK_PRETRANSLATEMSG        9
 
-// int(RECT*)
+/**
+ * @Prototype:int OnAppResize(RECT* rect)
+ * @Vars:
+ *		rect: 	Client rect
+ *
+ * Application is reszing
+**/
 #define EEHOOK_APPRESIZE              10
 
-// int(HWND)
+/**
+ * @Prototype:int OnAppActivate(HWND hWnd)
+ * @Vars:
+ *		hWnd: 	Handle of main window
+ *
+ * Main application was activated
+**/
 #define EEHOOK_APPACTIVATE            11
 
-// int(HWND old, HWND new)
-#define EEHOOK_CHILDACTIVE            12
+/**
+ * @Prototype:int OnChildActivate(HWND hOldWnd, HWND hNewWnd)
+ * @Vars:
+ *		hOldWnd: Handle of deactivated window
+ *		hNewWnd: Handle of activated window
+ *
+ * Child window(Text/Hex/Browser) was activated
+**/
+#define EEHOOK_CHILDACTIVATE          12
 
-// int(const wchar_t*, int)
+/**
+ * @Prototype:int OnRunningCommand(const wchar_t* command, int length)
+ * @Vars:
+ *		command: command's text
+ *		length:	 length
+ *
+ * Plugin can handle commands from Command Bar
+**/
 #define EEHOOK_RUNCOMMAND             13
 
-// int(const wchar_t*LPVOID)
+/**
+ * @Prototype:int OnPreLoadTextFile(const wchar_t* pathname)
+ * @Vars:
+ *		pathname: file's full path
+ *
+ * File would be loaded as text format
+**/
 #define EEHOOK_PRELOAD                14
 
-// int(const wchar_t*LPVOID)
+/**
+ * @Prototype:int OnPostLoadTextFile(const wchar_t* pathname)
+ * @Vars:
+ *		pathname: file's full path
+ *
+ * File was loaded as text format. Note: EverEdit loads files asynchronously, plugin might not get content in this hook.
+**/
 #define EEHOOK_POSTLOAD               15
 
-// int(HWND)
+/**
+ * @Prototype:int OnPostCreateTextFile(HWND hWnd)
+ * @Vars:
+ *		hWnd: Handle of this window
+ *
+ * A new text window was created
+**/
 #define EEHOOK_POSTNEWTEXT            16
 
-// int(HMENU, int, int)
+/**
+ * @Prototype:int OnPopupTabMenu(HMENU hMenu, int x, int y)
+ * @Vars:
+ *		hMenu:	Handle of menu
+ *		x:		x position
+ *		y:		y position
+ *
+ * Context menu of tab area will popup.
+**/
 #define EEHOOK_TABMENU                17
 
-// int(int, HWND, HICON*)
+/**
+ * @Prototype:int OnGetTextViewIcon(int type, HWND hWnd, HICON& ret)
+ * @Vars:
+ *		type:	Type of current window(Always is 1 now)
+ *		hWnd:	Handle of window
+ *		ret:	Handle of icon
+ *
+ * Plugin can customize icon of each text view.
+**/
 #define EEHOOK_VIEWICON               18
 
-// int(HWND, wchar_t*)
+/**
+ * @Prototype:int OnPopupDockMenu(HMENU hMenu, int x, int y)
+ * @Vars:
+ *		hMenu:	Handle of menu
+ *		x:		x position
+ *		y:		y position
+ *
+ * Context menu of dock tab will popup.
+**/
+#define EEHOOK_DOCKTABMENU            19
+
+/**
+ * @Prototype:int OnPreDirViewMenu(HMENU hMenu, int x, int y)
+ * @Vars:
+ *		hMenu:	Handle of menu
+ *		x:		x position
+ *		y:		y position
+ *
+ * Context menu of directory view will popup. Plugin can add menu items with any unique id which is different with ContextMenu
+**/
+#define EEHOOK_PREDIRVIEWMENU         20
+
+/**
+ * @Prototype:int OnPostDirViewMenu(HWND hWnd, int command)
+ * @Vars:
+ *		hWnd:	Handle of directory view window
+ *		command:Selected command
+ *
+ * Context menu of directory view was popuped. Plugin executes some functions via command.
+**/
+#define EEHOOK_POSTDIRVIEWMENU        21
+
+/**
+ * @Prototype:int OnInputText(HWND hWnd, wchar_t* text)
+ * @Vars:
+ *		hWnd:	Handle of text window
+ *		text:	content
+ *
+ * Text will be inserted into text document by keyboard.
+**/
 #define EEHOOK_TEXTCHAR               100
 
-// int(HWND, WPARAM, LPARAM)
+/**
+ * @Prototype:int OnTextCommand(HWND hWnd, WPARAM wp, LPARAM lp)
+ * @Vars:
+ *		hWnd:	Handle of text window
+ *
+ * Command hook for text document
+**/
 #define EEHOOK_TEXTCOMMAND            101
 
-// int(HWND, ECNMHDR_TextUpdate*)
+/**
+ * @Prototype:int OnUpdateTextView(HWND hWnd, ECNMHDR_TextUpdate* info)
+ * @Vars:
+ *		hWnd:	Handle of text window
+ *		info:	info includes insert/delete range
+ *
+ * Delete/Insert operations were executed! All text were already updated, so DO NOT use info to get text!
+**/
 #define EEHOOK_UPDATETEXT             102
 
-// int(HWND, ECNMHDR_CaretChange*)
+/**
+ * @Prototype:int OnCaretChange(HWND hWnd, ECNMHDR_CaretChange* info)
+ * @Vars:
+ *		hWnd:	Handle of text window
+ *		info:
+ *
+ * Caret's position was changed!
+**/
 #define EEHOOK_TEXTCARETCHANGE        103
 
-// AutoWordList*(HWND, AutoWordInput*)
+/**
+ * @Prototype:int OnPreWordComplete(HWND hWnd, AutoWordInput* info)
+ * @Vars:
+ *		hWnd:	Handle of text window
+ *		info:
+ *
+ * Auto completion is collecting words.
+**/
 #define EEHOOK_PREWORDCOMPLETE        104
 
-// int(int, LPCTSTR, int)
+/**
+ * @Prototype:int OnPostWordComplete(HWND hWnd, int id, const wchar_t* text, int length)
+ * @Vars:
+ *		hWnd:	Handle of text window
+ *		text:	word's text
+ *		length:	word's length
+ *
+ * Word will be inserted into document
+**/
 #define EEHOOK_POSTWORDCOMPLETE       105
 
-// int()
+/**
+ * @Prototype:int OnCloseWordComplete()
+ *
+ * Window of auto completion was closed.
+**/
 #define EEHOOK_CLOSEWORDCOMPLETE      106
 
-// int(HWND, wchar_t)
-#define EEHOOK_HEXCHAR                200
-
-
-// 函数返回此消息表示不再继续往其它的callback路由, magic value
+/**
+ * Hook function can return this message to stop routing message!
+**/
 #define EEHOOK_RET_DONTROUTE          0xBC614E
 
-//******************************************************************************
-// 插件用函数和结构体
 
-//上下文信息
-struct EE_Context
+/**
+ * Position of docking window
+**/
+#define EE_DOCK_LEFT                0
+#define EE_DOCK_RIGHT               1
+#define EE_DOCK_BOTTOM              2
+#define EE_DOCK_TOP					3
+#define EE_DOCK_UNKNOWN             5
+
+/**
+ * Context of main application
+**/
+typedef struct tagEE_Context
 {
-    HWND hMain;
-    HWND hToolBar;
-    HWND hStatusBar;
-    HWND hClient;
-    HWND hStartPage;
-    HMENU hMainMenu;
-    HMENU hPluginMenu;
-    DWORD* pCommand;
-    DWORD dwVersion;
-    DWORD dwBuild;
-    LCID dwLCID;
-};
+    HWND 	hMain;			// Main window
+    HWND 	hToolBar;		// Toolbar
+    HWND 	hStatusBar;		// Status bar
+    HWND 	hClient;		// Client window
+    HWND 	hStartPage;		// Start page
+    HMENU	hMainMenu;		// Main menu
+    HMENU 	hPluginMenu;	// Plugin menu
+    DWORD* 	pCommand;		// Command value. Plugin reserves some commands and set a new value for other plugins
+    DWORD 	dwVersion;		// Version info
+    DWORD 	dwBuild;		// Build info
+    LCID 	dwLCID;			// LCID
+} EE_Context;
 
-//用于批量添加Hook
-struct EE_HookFunc
+/**
+ * EE_HookFunc
+**/
+typedef struct tagEE_HookFunc
 {
-	int nType;
- 	LPVOID lpFunc;
-};
+	int 	nType;			// type
+ 	LPVOID 	lpFunc;			// address of callback
+} EE_HookFunc;
 
-// Messages
-struct EE_LoadFile
+/**
+ * EE_LoadFile
+**/
+typedef struct tagEE_LoadFile
 {
-    int nCodepage;
-    int nViewType;
-    BOOL bReadOnly;
-};
+    int 	nCodepage;		// Codepage of file
+    int 	nViewType;		// View's type
+    BOOL 	bReadOnly;		// Is read-only?
+} EE_LoadFile;
 
-//界面元素更新
-struct EE_UpdateUIElement
+/**
+ * EE_UpdateUIElement
+**/
+typedef struct tagEE_UpdateUIElement
 {
     int nAction;
-    int nValue;
-};
+    int nValue;			// update to new state
+} EE_UpdateUIElement;
 
-// 窗口停靠的位置
-#define EE_DOCK_LEFT                0
-#define EE_DOCK_TOP                 1
-#define EE_DOCK_RIGHT               2
-#define EE_DOCK_BOTTOM              3
-#define EE_DOCK_FLOAT               4
-
-#define EE_DOCK_NOLEFT              (1<<EE_DOCK_LEFT)
-#define EE_DOCK_NOTOP               (1<<EE_DOCK_TOP)
-#define EE_DOCK_NORIGHT             (1<<EE_DOCK_RIGHT)
-#define EE_DOCK_NOBOTTOM            (1<<EE_DOCK_BOTTOM)
-
-struct EE_DockingWindow
+/**
+ * EE_DockingWindow
+**/
+typedef struct tagEE_DockingWindow
 {
     HWND hWnd;
-    BOOL bDestroyOnClose;
-    int nSide; 
-};
+    int nSide;			// valid on adding
+} EE_DockingWindow;
 
-
-//自动完成时用户输入的提示文本信息
-struct AutoWordInput
+/**
+ * AutoWordInput
+**/
+typedef struct tagAutoWordInput
 {
-    EC_Pos* pos;
-    const wchar_t* lpHintText;
-    int nLength;
-};
+    EC_Pos* pos;					// caret pos
+    const 	wchar_t* lpHintText;	// User is inputting some texts
+    int 	nLength;
+} AutoWordInput;
 
-//插件返回的自动完成信息
-struct AutoWordList
+/**
+ * Plugin returns words for auto completion
+**/
+typedef struct tagAutoWordList
 {
-    wchar_t** lpWords;
-    int nCount;
-    HICON hIcon;
-    DWORD id;
-};
+    wchar_t** 	lpWords;			// words
+    int 		nCount;				// count
+    HICON 		hIcon;				// Not used!
+    DWORD 		id;					// ID
+} AutoWordList;
 
+/**
+ * Web preview
+**/
+typedef struct tagWebPreviewData
+{
+	const wchar_t* lpPathName;	// full path
+	const wchar_t* lpCharset;	// Not used!
+	bool bCanDelete;			// Can be delete after closing EverEdit?
+} WebPreviewData;
 
 #endif //__EESDK_HPP__
-

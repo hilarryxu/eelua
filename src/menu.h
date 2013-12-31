@@ -6,14 +6,14 @@
 #ifndef EELUA_MENU_H_
 #define EELUA_MENU_H_
 
+#include "config.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 #include "lua.h"
 #include "lauxlib.h"
-
-struct EE_Context;
 
 int menu_open(lua_State* L, EE_Context* context);
 int menu_new(lua_State* L);

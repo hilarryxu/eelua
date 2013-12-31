@@ -6,18 +6,16 @@
 #ifndef EELUA_PLUGIN_H_
 #define EELUA_PLUGIN_H_
 
-#include <windows.h>
+#include "config.h"
 
 #define EELUA_EXPORT __declspec(dllexport)
 
-struct EE_Context;
-
 extern "C" {
-EELUA_EXPORT DWORD EE_PluginInit(struct EE_Context* context);
+EELUA_EXPORT DWORD EE_PluginInit(EE_Context* context);
 EELUA_EXPORT DWORD EE_PluginUninit();
 EELUA_EXPORT DWORD EE_PluginInfo(wchar_t* text, int len);
 
-EELUA_EXPORT DWORD dofile(struct EE_Context* context, LPRECT rect, const wchar_t* text);
+EELUA_EXPORT DWORD dofile(EE_Context* context, LPRECT rect, const wchar_t* text);
 }
 
 #endif  // EELUA_PLUGIN_H_

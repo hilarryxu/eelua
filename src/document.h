@@ -6,7 +6,7 @@
 #ifndef EELUA_DOCUMENT_H_
 #define EELUA_DOCUMENT_H_
 
-#include <windows.h>
+#include "config.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -14,8 +14,6 @@ extern "C" {
 
 #include "lua.h"
 #include "lauxlib.h"
-
-struct EE_Context;
 
 int document_open(lua_State* L);
 int document_new(lua_State* L, HWND window);

@@ -6,6 +6,8 @@
 #ifndef EELUA_EELUA_H_
 #define EELUA_EELUA_H_
 
+#include "config.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -13,8 +15,6 @@ extern "C" {
 #include "lua.h"
 #include "lauxlib.h"
 #include "lualib.h"
-
-struct EE_Context;
 
 lua_State* eelua_setup(EE_Context* context);
 void eelua_teardown(lua_State* L);

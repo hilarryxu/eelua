@@ -8,24 +8,25 @@ Features
 
     1. Most feature same as EverEdit's internal script engine(vbs, jscript)
     2. Lua scriprts just like scripts in EverEdit's macro dir
-    3. Plugin architecture for large script
+    3. Plugin architecture for large script bundle
     4. An `dofile` function can called in EverEdit's mode file
-    5. Hook event on demand for performance
+    5. Hook event ondemand for performance
 
 System Requirements
 -------------------
 
-For now, I use mingw and ninja build it, also I shiped a mingw build luajit library and a ninja binary.
+For now, I use mingw and premake4 build it, also I shiped a mingw build luajit library and a premake4 binary.
 
 - [mingw](http://www.mingw.org/)
-- [ninja](https://github.com/martine/ninja)
+- [premake4](http://industriousone.com/premake)
 
 Build
 -----
 
 ```
-mkdir build
-ninja
+premake4 embed
+premake4 gmake
+make
 ```
 
 Installation

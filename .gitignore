@@ -1,8 +1,16 @@
-build
-eelua/*.dll
-src/scripts.cc
-eelua.dll
-
 .hg
 .hgignore
+
+src/scripts.cc
+*.make
+Makefile
+
+
+libeelua.a
+deps/auxiliar/libauxiliar.a
+eelua/*.dll
+eelua/*.a
+eelua.dll
+
+obj
 
