@@ -15,30 +15,29 @@ Features
 System Requirements
 -------------------
 
-For now, I use mingw and premake4 build it, also I shiped a mingw build luajit library and a premake4 binary.
+For now, I use mingw and xmake build it.
 
 - [mingw](http://www.mingw.org/)
-- [premake4](http://industriousone.com/premake)
+- [xmake](http://xmake.io/)
 
 Build
 -----
 
 ```
-premake4 embed
-premake4 gmake
-make
+xmake f -p mingw -a x86_64
+xmake
 ```
 
 Installation
 ------------
 
-Copy `lua51.dll` to EverEdit's dir, copy `eelua.dll` to EverEdit's plugin dir (create it if not exist), then
+Copy `lua53.dll` to EverEdit's dir, copy `eelua.dll` to EverEdit's plugin dir (create it if not exist), then
 copy `eelua` dir to EverEdit's dir, just like:
 
 ```
 EverEdit/
   everedit.exe
-  lua51.dll
+  lua53.dll
   plugin/
     eelua.dll
   eelua/

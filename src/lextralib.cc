@@ -237,10 +237,10 @@ static luaL_Reg string_funcs[] = {
 };
 
 int lextralib_open(lua_State* L) {
-  luaL_register(L, "path", path_funcs);
-  luaL_register(L, "os", os_funcs);
-  luaL_register(L, "string", string_funcs);
-  lua_pop(L, 3);
+  // luaL_openlib(L, "path", path_funcs, 0);
+  // luaL_openlib(L, "os", os_funcs, 0);
+  // luaL_openlib(L, "string", string_funcs, 0);
+  // lua_pop(L, 3);
   return 0;
 }
 

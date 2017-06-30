@@ -89,7 +89,7 @@ static int document_insert(lua_State* L) {
 
 static int document_gotoline(lua_State* L) {
   p_document doc = (p_document) auxiliar_checkclass(L, CLASS_DOCUMENT, 1);
-  int nr_line = luaL_checkint(L, 2);
+  int nr_line = luaL_checkinteger(L, 2);
   ::SendMessage(doc->window, ECM_JUMPTOLINE, nr_line, 0);
   return 0;
 }
@@ -113,10 +113,10 @@ static int document_hassel(lua_State* L) {
 
 static int document_setsel(lua_State* L) {
   p_document doc = (p_document) auxiliar_checkclass(L, CLASS_DOCUMENT, 1);
-  int sline = luaL_checkint(L, 2);
-  int scol = luaL_checkint(L, 3);
-  int eline = luaL_checkint(L, 4);
-  int ecol = luaL_checkint(L, 5);
+  int sline = luaL_checkinteger(L, 2);
+  int scol = luaL_checkinteger(L, 3);
+  int eline = luaL_checkinteger(L, 4);
+  int ecol = luaL_checkinteger(L, 5);
 
   EC_Pos spos = {sline, scol};
   EC_Pos epos = {eline, ecol};
@@ -126,15 +126,15 @@ static int document_setsel(lua_State* L) {
 
 static int document_sendcommand(lua_State* L) {
   p_document doc = (p_document) auxiliar_checkclass(L, CLASS_DOCUMENT, 1);
-  int cmd = luaL_checkint(L, 2);
+  int cmd = luaL_checkinteger(L, 2);
   ::SendMessage(doc->window, WM_COMMAND, cmd, 0);
   return 0;
 }
 
 static int document_insert_at(lua_State* L) {
   p_document doc = (p_document) auxiliar_checkclass(L, CLASS_DOCUMENT, 1);
-  int line = luaL_checkint(L, 2);
-  int col = luaL_checkint(L, 3);
+  int line = luaL_checkinteger(L, 2);
+  int col = luaL_checkinteger(L, 3);
   const char *text = luaL_checkstring(L, 4);
   std::wstring buf = InternalStringToWide(text);
   EC_Pos pos = {line, col};
@@ -145,10 +145,10 @@ static int document_insert_at(lua_State* L) {
 
 static int document_delete(lua_State* L) {
   p_document doc = (p_document) auxiliar_checkclass(L, CLASS_DOCUMENT, 1);
-  int sline = luaL_checkint(L, 2);
-  int scol = luaL_checkint(L, 3);
-  int eline = luaL_checkint(L, 4);
-  int ecol = luaL_checkint(L, 5);
+  int sline = luaL_checkinteger(L, 2);
+  int scol = luaL_checkinteger(L, 3);
+  int eline = luaL_checkinteger(L, 4);
+  int ecol = luaL_checkinteger(L, 5);
 
   EC_Pos spos = {sline, scol};
   EC_Pos epos = {eline, ecol};
@@ -166,7 +166,7 @@ static int document_group_undo(lua_State* L) {
 
 static int document_getline(lua_State* L) {
   p_document doc = (p_document) auxiliar_checkclass(L, CLASS_DOCUMENT, 1);
-  int linenr = luaL_checkint(L, 2);
+  int linenr = luaL_checkinteger(L, 2);
   const wchar_t* text = (const wchar_t*) ::SendMessage(doc->window, ECM_GETLINEBUF, linenr, 0);
   std::string buf = WideToInternalString(text);
   lua_pushstring(L, buf.c_str());

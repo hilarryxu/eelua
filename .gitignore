@@ -1,6 +1,9 @@
 .hg
 .hgignore
 
+.xmake/
+build/
+
 src/scripts.cc
 *.make
 Makefile

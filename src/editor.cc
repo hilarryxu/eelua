@@ -81,7 +81,7 @@ static int editor_document(lua_State* L) {
 
 static int editor_sendcommand(lua_State* L) {
   p_editor editor = (p_editor) auxiliar_checkclass(L, CLASS_EDITOR, 1);
-  int cmd = luaL_checkint(L, 2);
+  int cmd = luaL_checkinteger(L, 2);
   EE_Context* context = editor->context;
   ::SendMessage(context->hMain, WM_COMMAND, cmd, 0);
   return 0;
