@@ -9,6 +9,7 @@
  *
  * 2013/01/10 First Version
  * 2013/11/12 Update for EverEdit 3.0
+ * 2014/05/26 Update for 3.2.4.3696+
 *******************************************************************************/
 
 #ifndef __EECORE_HPP__
@@ -51,8 +52,12 @@
 /**
  * Edit Mode
 **/
-#define EC_EDITMODE_NORMAL          0
-#define EC_EDITMODE_OVERWRITE       1
+#define	EC_EDITMODE_NORMAL			0
+#define	EC_EDITMODE_OVERWRITE		1
+#define EC_EDITMODE_COLUMN			2
+#define EC_EDITMODE_MULTIPLE		3
+#define EC_EDITMODE_VIRTUALSPACE	4
+#define EC_EDITMODE_RETURN			0xFF
 
 /**
  * Line Wrap Mode
@@ -62,7 +67,42 @@
 #define EC_WRAP_SMART               2
 #define EC_WRAP_COL                 3
 #define EC_WRAP_EXPANDTAB           4
-#define EC_WRAP_GETWRAPDATA         11 //get wrap data of EC_WRAP_COL and  EC_WRAP_EXPANDTAB
+#define EC_WRAP_GETWRAPDATA         11 //get wrap data of EC_WRAP_COL and EC_WRAP_EXPANDTAB
+
+/**
+ * Syntax State
+**/
+#define CS_DEFAULT		0
+#define CS_COMMENT1		1
+#define CS_COMMENT2		2
+#define CS_STRING1		3
+#define CS_STRING2		4
+#define CS_TAG			5
+#define CS_MACRO		6
+#define CS_URL			7
+#define CS_EMAIL		8
+#define CS_NUMBER		9
+#define CS_FOUND		10
+#define CS_PAIR			11
+#define CS_FUNCTION		12
+#define CS_VAR          13
+#define CS_SUBLAN       14
+#define CS_OPERATOR     15
+#define CS_WORD1		16
+#define CS_WORD2		17
+#define CS_WORD3		18
+#define CS_WORD4		19
+#define CS_HIGHLIGHT1	20
+#define CS_HIGHLIGHT2	21
+#define CS_HIGHLIGHT3	22
+#define CS_HIGHLIGHT4	23
+#define CS_HIGHLIGHT5	24
+#define CS_HIGHLIGHT6	25
+#define CS_HIGHLIGHT7	26
+#define CS_HIGHLIGHT8	27
+#define CS_IGNORE		29
+#define CS_CONCEAL		30
+#define CS_LAST			32
 
 /**
  * Move Caret and Selection Commands
@@ -275,7 +315,7 @@
 /**
  * @Msg:	Set style of line break(EOL)
  * @Return: int: New style
- * @wparam: int: EC_EOL_NULL,EC_EOL_WIN,EC_EOL_UNIX,EC_EOL_MAC. Set a invalid value to get current EOL type.
+ * @wparam: int: EC_EOL_NULL,EC_EOL_WIN,EC_EOL_UNIX,EC_EOL_MAC. Set an invalid value to get current EOL type.
 **/
 #define ECM_SETEOLTYPE              WM_USER+18
 
@@ -302,7 +342,7 @@
 /**
  * @Msg:	Set/get current edit mode
  * @Return: int: Current edit mode
- * @wparam: int: set a invalid value to return current setting.
+ * @wparam: int: set an invalid value to return current setting.
 **/
 #define ECM_EDITMODE                WM_USER+28
 
@@ -443,9 +483,17 @@
 #define ECM_GETFONTHEIGHT           WM_USER+61
 
 /**
+ * @Msg   : Get encoding of current buffer
+ * @Return: int: encoding value
+ * @wparam: int: (1:set, 0:get)
+ * @lparam: If wparam is set, lparam is the new encoding
+ **/
+#define ECM_GETBUFFERENCODING       WM_USER+63
+
+/**
  * @Msg   : Export all text to a file
  * @wparam: wchar_t*:	full path
- * @lparan: EC_Export*
+ * @lparam: EC_Export*
 **/
 #define ECM_EXPORT                  WM_USER+64
 
@@ -456,6 +504,15 @@
  *			FALSE:	Make doc be dirty
 **/
 #define ECM_FORCENEW                WM_USER+65
+
+/**
+ * @Msg: 	Get line styles
+ * @Return: CharStyle* (If can't get valid data, it will return NULL )
+ * @wparam: int:	line
+ *			BOOL:	include highlights? such as user defined mark, found string..., default is FALSE which means it will
+ *                  always return syntax state.
+**/
+#define ECM_GETLINESTYLE    	    WM_USER+66
 
 /**
  * @Msg: 	Get/set column marker
@@ -479,7 +536,7 @@
 /**
  * @Msg: 	Comment or uncomment selection
  * @Return: BOOL: return TRUE if success
- * @wparam: const wchar_t*
+ * @wparam: const wchar_t**, string array "/*", "* /"
  * @lparam: BOOL
  *			TRUE:	Comment
  *			FALSE:	Uncomment
@@ -563,6 +620,24 @@
 #define ECM_FOLDINGSTYLE            WM_USER+90
 
 /**
+ * @Msg: 	Close un-closed html/xml tag on caret position
+ * @Return: BOOL: Return true if success, otherwise return false
+**/
+#define ECM_CLOSETAG               WM_USER+105
+
+/**
+ * @Msg: 	Is current view loading document?
+ * @Return: BOOL
+**/
+#define ECM_ISLOADING              WM_USER+106
+
+/**
+ * @Msg: 	Insert text with column mode
+ * @Return: BOOL: Return true if success, otherwise return false
+**/
+#define ECM_INSERTCOLTEXT          WM_USER+120
+
+/**
  * Notify Messages
 **/
 #define ECN_UPDATETEXT              1
@@ -582,6 +657,98 @@
 #define GETWORD_LSYNTAX             16
 #define GETWORD_RSYNTAX             32
 #define GETWORD_SYNTAX              GETWORD_LSYNTAX|GETWORD_RSYNTAX
+
+/**
+ * Colors
+**/
+#define CLR_DEFAULT_BG				0
+#define CLR_DEFAULT_FG				1
+#define CLR_DEFAULT_BG2				2
+#define CLR_DEFAULT_BGNULL			3
+#define CLR_SEL_BG					4
+#define CLR_SEL_FG					5
+#define CLR_TABSPACE_BG				6
+#define CLR_TABSPACE_FG				7
+#define CLR_LINENO_BG				8
+#define CLR_LINENO_FG				9
+#define CLR_FOLDING_BG				10
+#define CLR_FOLDING_FG				11
+#define CLR_PAIR_BG					12
+#define CLR_PAIR_FG					13
+#define CLR_RULER_BG				14
+#define CLR_RULER_FG				15
+#define CLR_FOUND_BG				16
+#define CLR_FOUND_FG				17
+#define CLR_MASKLINE_BG0			17
+#define CLR_MASKLINE_BG1			18
+#define CLR_MASKLINE_BG2			19
+#define CLR_MASKLINE_BG3			20
+#define CLR_MASKLINE_BG4			21
+#define CLR_BOOKMARK_FG				22
+#define CLR_INDENT_LINE				23
+#define CLR_SEL_INDICATOR			25
+#define CLR_WAVE_LINE				26
+#define CLR_ACTIVE_LINE				27
+#define CLR_FOLDING_LINE			28
+#define CLR_BOUNDARY_LINE 			29
+#define CLR_ICONAREA_BG 			30
+#define CLR_ICONAREA_FG 			31
+#define CLR_BOOKMARK_BG 			32
+#define CLR_CONCHAR_BG				33
+#define CLR_CONCHAR_FG				34
+
+#define CLR_COMMENT1_BG				40
+#define CLR_COMMENT1_FG				41
+#define CLR_COMMENT2_BG				42
+#define CLR_COMMENT2_FG				43
+#define CLR_STRING1_BG				44
+#define CLR_STRING1_FG				45
+#define CLR_STRING2_BG				46
+#define CLR_STRING2_FG				47
+#define CLR_TAG_BG					48
+#define CLR_TAG_FG					49
+#define CLR_MACRO_BG				50
+#define CLR_MACRO_FG				51
+#define CLR_URL_BG					52
+#define CLR_URL_FG					53
+#define CLR_EMAIL_BG				54
+#define CLR_EMAIL_FG				55
+#define CLR_NUMBER_BG				56
+#define CLR_NUMBER_FG				57
+#define CLR_WORD1_BG				60
+#define CLR_WORD1_FG				61
+#define CLR_WORD2_BG				62
+#define CLR_WORD2_FG				63
+#define CLR_WORD3_BG				64
+#define CLR_WORD3_FG				65
+#define CLR_WORD4_BG				66
+#define CLR_WORD4_FG				67
+#define CLR_FUNCTION_BG				68
+#define CLR_FUNCTION_FG				69
+#define CLR_VAR_BG                  72
+#define CLR_VAR_FG                  73
+#define CLR_SUBLAN_BG               76
+#define CLR_SUBLAN_FG               77
+#define CLR_OPERATOR_BG             80
+#define CLR_OPERATOR_FG             81
+#define CLR_HIGHLIGHT1_BG			84
+#define CLR_HIGHLIGHT1_FG			85
+#define CLR_HIGHLIGHT2_BG			86
+#define CLR_HIGHLIGHT2_FG			87
+#define CLR_HIGHLIGHT3_BG			88
+#define CLR_HIGHLIGHT3_FG			89
+#define CLR_HIGHLIGHT4_BG			90
+#define CLR_HIGHLIGHT4_FG			91
+#define CLR_HIGHLIGHT5_BG			92
+#define CLR_HIGHLIGHT5_FG			93
+#define CLR_HIGHLIGHT6_BG			94
+#define CLR_HIGHLIGHT6_FG			95
+#define CLR_HIGHLIGHT7_BG			96
+#define CLR_HIGHLIGHT7_FG			97
+#define CLR_HIGHLIGHT8_BG			98
+#define CLR_HIGHLIGHT8_FG			99
+#define CLR_LAST					128
+
 
 typedef struct tagEC_Pos
 {
@@ -648,5 +815,12 @@ typedef struct tagECNMHDR_TextClick
     EC_Pos epos;
     const wchar_t* lpText;
 } ECNMHDR_TextClick;
+
+typedef struct tagCharStyle
+{
+	BYTE state:(5); //Syntax State
+	BYTE dummy1:(3);
+	BYTE dummy2:(8);
+} CharStyle;
 
 #endif //__EESDK_HPP__
