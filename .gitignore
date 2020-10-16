@@ -3,3 +3,4 @@ obj/
 
 *.make
 Makefile
+lib/lua51.dll
