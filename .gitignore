@@ -1,19 +1,5 @@
-.hg
-.hgignore
+bin/
+obj/
 
-.xmake/
-build/
-
-src/scripts.cc
 *.make
 Makefile
-
-
-libeelua.a
-deps/auxiliar/libauxiliar.a
-eelua/*.dll
-eelua/*.a
-eelua.dll
-
-obj
-

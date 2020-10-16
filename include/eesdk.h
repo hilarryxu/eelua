@@ -745,8 +745,8 @@ typedef struct tagWebPreviewData
 {
 	const wchar_t* lpPathName;	// full path
 	const wchar_t* lpCharset;	// Not used!
-	bool bCanDelete;			// Can be delete after closing EverEdit?
-	bool bSplitGroup;			// show in split group
+	BOOL bCanDelete;			// Can be delete after closing EverEdit?
+	BOOL bSplitGroup;			// show in split group
 } WebPreviewData;
 
 /**

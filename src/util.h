@@ -1,4 +1,4 @@
-// Copyright (C) 2013 by Larry Xu
+// Copyright (C) 2020 by Larry Xu
 //
 // This file is part of eelua, distributed under the MIT License.
 // For full terms see the included LICENSE file.
@@ -6,11 +6,9 @@
 #ifndef EELUA_UTIL_H_
 #define EELUA_UTIL_H_
 
-#include <string>
-
 #include "config.h"
 
-void LoggerImpl(const char* domain, int level, const char* fmt, ...);
+void LoggerImpl(const char *domain, int level, const char *fmt, ...);
 
 #define LOG_LEVEL_OFF 11
 #define LOG_LEVEL_FATAL 9
@@ -25,11 +23,7 @@ void LoggerImpl(const char* domain, int level, const char* fmt, ...);
 #define LOGI(fmt, ...) LoggerImpl(LOG_TAG, LOG_LEVEL_INFO, fmt, ##__VA_ARGS__)
 #define LOGD(fmt, ...) LoggerImpl(LOG_TAG, LOG_LEVEL_DEBUG, fmt, ##__VA_ARGS__)
 
-std::string WideToInternalString(const std::wstring& wide);
-std::wstring InternalStringToWide(const std::string& luastring);
-
-void ReportLuaWarn(const char* msg);
-void ReportLuaError(const char* msg);
+void ReportLuaWarn(const char *msg);
+void ReportLuaError(const char *msg);
 
 #endif  // EELUA_UTIL_H_
-
