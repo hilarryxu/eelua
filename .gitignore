@@ -4,3 +4,6 @@ obj/
 *.make
 Makefile
 lib/lua51.dll
+
+ezip/lua51.dll
+ezip/plugin/eelua.dll
