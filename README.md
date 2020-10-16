@@ -14,7 +14,7 @@ Features
 System Requirements
 -------------------
 
-For now, I use mingw and xmake build it.
+For now, I use mingw and premake5 build it.
 
 - [mingw](http://www.mingw.org/)
 - [premake5](https://github.com/premake/premake-core)
