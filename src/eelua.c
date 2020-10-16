@@ -11,22 +11,21 @@
 
 #include "util.h"
 
-#define LOG_TAG "eelua"
+#define LOG_TAG     "eelua"
 
 
 int
 Leelua_dprint(lua_State *L)
 {
     const char *msg = luaL_checkstring(L, 1);
-    OutputDebugStringA(msg);
-
+    ReportLuaWarn(msg);
     return 0;
 }
 
 
-static luaL_Reg funcs[] = {
-  {"dprint", Leelua_dprint},
-  {NULL, NULL}
+static luaL_Reg  funcs[] = {
+    { "dprint", Leelua_dprint },
+    { NULL, NULL }
 };
 
 

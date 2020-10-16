@@ -13,7 +13,7 @@
 #include "util.h"
 #include "eelua.h"
 
-#define LOG_TAG "eelua_plugin"
+#define LOG_TAG     "eelua_plugin"
 
 EE_Context *g_ee_context = NULL;
 HMODULE g_ee_module = NULL;
@@ -44,7 +44,6 @@ EE_PluginInit(EE_Context *context)
         lua_pop(L, 1);
         run_eelua_init(L);
     }
-
     return 0;
 }
 
@@ -70,37 +69,37 @@ EE_PluginInfo(wchar_t *text, int len)
 EELUA_EXPORT DWORD
 dofile(EE_Context *context, LPRECT rect, const wchar_t *text)
 {
-  lua_State *L = g_lua_vm;
-  char buf[PATH_MAX] = {0};
-  GetModuleFileNameA(NULL, buf, sizeof(buf));
-  char *p = strrchr(buf, '\\');
-  if (p) *p = '\0';
-  strcat(buf, "\\eelua\\scripts\\");
+    lua_State *L = g_lua_vm;
 
-  LOGI("dofile: %s", buf);
-  if (luaL_dofile(L, buf)) {
-    ReportLuaError(lua_tostring(L, -1));
-    return 1;
-  }
-  return 0;
+    lua_getglobal(L, "OnDoFile");
+    lua_pushlightuserdata(L, context);
+    lua_pushlightuserdata(L, rect);
+    lua_pushlightuserdata(L, (void *) text);
+    int rc = lua_pcall(L, 3, 0, 0);
+    if (rc != 0) {
+        const char *msg = lua_tostring(L, -1);
+        ReportLuaWarn(msg);
+        lua_pop(L, 1);
+    }
+    return 0;
 }
 
 
 BOOL WINAPI
 DllMain(HMODULE module, DWORD reason, LPVOID reserved)
 {
-  g_ee_module = module;
+    g_ee_module = module;
 
-  switch (reason) {
-  case DLL_PROCESS_ATTACH:
-    break;
-  case DLL_THREAD_ATTACH:
-    break;
-  case DLL_THREAD_DETACH:
-    break;
-  case DLL_PROCESS_DETACH:
-    break;
-  }
+    switch (reason) {
+    case DLL_PROCESS_ATTACH:
+        break;
+    case DLL_THREAD_ATTACH:
+        break;
+    case DLL_THREAD_DETACH:
+        break;
+    case DLL_PROCESS_DETACH:
+        break;
+    }
 
-  return TRUE;
+    return TRUE;
 }

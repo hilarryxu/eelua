@@ -11,12 +11,10 @@
 #include "eesdk.h"
 
 #ifdef _MSC_VER
-#define snprintf _snprintf
-#define PATH_MAX _MAX_PATH
+#define snprintf  _snprintf
+#define PATH_MAX  _MAX_PATH
 #endif
 
-// #define EELUA_INTERNAL_UTF8 1
-
-#define OKAY (0)
+// #define EELUA_INTERNAL_UTF8  1
 
 #endif  // EELUA_CONFIG_H_

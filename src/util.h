@@ -10,12 +10,12 @@
 
 void LoggerImpl(const char *domain, int level, const char *fmt, ...);
 
-#define LOG_LEVEL_OFF 11
-#define LOG_LEVEL_FATAL 9
-#define LOG_LEVEL_ERROR 7
-#define LOG_LEVEL_WARN 5
-#define LOG_LEVEL_INFO 3
-#define LOG_LEVEL_DEBUG 1
+#define LOG_LEVEL_OFF       11
+#define LOG_LEVEL_FATAL     9
+#define LOG_LEVEL_ERROR     7
+#define LOG_LEVEL_WARN      5
+#define LOG_LEVEL_INFO      3
+#define LOG_LEVEL_DEBUG     1
 
 #define LOGF(fmt, ...) LoggerImpl(LOG_TAG, LOG_LEVEL_FATAL, fmt, ##__VA_ARGS__)
 #define LOGE(fmt, ...) LoggerImpl(LOG_TAG, LOG_LEVEL_ERROR, fmt, ##__VA_ARGS__)

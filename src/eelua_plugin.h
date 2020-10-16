@@ -8,7 +8,7 @@
 
 #include "config.h"
 
-#define EELUA_EXPORT __declspec(dllexport)
+#define EELUA_EXPORT    __declspec(dllexport)
 
 EELUA_EXPORT DWORD EE_PluginInit(EE_Context *context);
 EELUA_EXPORT DWORD EE_PluginUninit();
