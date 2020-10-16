@@ -11,9 +11,12 @@ solution "sln-eelua"
     links { "lua51" }
 
     configuration "Debug"
-       defines { "DEBUG" }
-       symbols "On"
+      defines { "DEBUG" }
+      symbols "On"
 
     configuration "Release"
-       defines { "NDEBUG" }
-       optimize "On"
+      defines { "NDEBUG" }
+      optimize "On"
+
+    configuration { "gmake" }
+      linkoptions { "-static-libgcc" }
