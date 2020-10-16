@@ -171,7 +171,7 @@ BOOL GlobalUnlock(
   HANDLE hMem
 );
 
-typedef int (__stdcall *pfnOnRunningCommand)(const wchar_t* command, int length);
+typedef int (*pfnOnRunningCommand)(const wchar_t* command, int length);
 typedef int (*pfnOnAppMessage)(UINT uMsg, WPARAM wp, LPARAM lp);
 typedef int (*pfnOnPreExecuteScript)(const wchar_t* pathname);
 

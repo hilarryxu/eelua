@@ -33,7 +33,11 @@ int
 luaopen_eelua(lua_State *L)
 {
     luaL_register(L, "eelua", funcs);
+#if defined(_M_X64) || defined(__x86_64__)
+    lua_pushboolean(L, 1);
+#else
     lua_pushboolean(L, 0);
+#endif
     lua_setfield(L, -2, "x64");
 #if !defined(NDEBUG)
     lua_pushboolean(L, 1);

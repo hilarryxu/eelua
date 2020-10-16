@@ -71,7 +71,7 @@ end
 
 OnRunningCommand = ffi_cast("pfnOnRunningCommand", function(wcommand, wlen)
   _p("command: %s", unicode.w2a(wcommand, wlen))
-  return 0
+  return C.EEHOOK_RET_DONTROUTE
 end)
 
 OnAppMessage = ffi_cast("pfnOnAppMessage", function(msg, wparam, lparam)
