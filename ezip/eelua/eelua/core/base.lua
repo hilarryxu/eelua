@@ -90,6 +90,7 @@ typedef HANDLE HWND;
 typedef HANDLE HMENU;
 typedef HANDLE HMODULE;
 
+typedef uint16_t WORD;
 typedef uint32_t DWORD;
 typedef uint32_t UINT;
 typedef uint32_t* UINT_PTR;

@@ -6,6 +6,9 @@ local os = require"os"
 require"eelua.stdext"
 
 local C = ffi.C
+local ffi_new = ffi.new
+local ffi_str = ffi.string
+local ffi_cast = ffi.cast
 local str_fmt = string.format
 local tinsert = table.insert
 local tconcat = table.concat
@@ -37,6 +40,31 @@ int GetCurrentDirectoryA(
   char* lpBuffer
 );
 
+typedef struct _FILETIME {
+    DWORD dwLowDateTime;
+    DWORD dwHighDateTime;
+} FILETIME;
+
+typedef struct _WIN32_FIND_DATAA {
+  DWORD dwFileAttributes;
+  FILETIME ftCreationTime;
+  FILETIME ftLastAccessTime;
+  FILETIME ftLastWriteTime;
+  DWORD nFileSizeHigh;
+  DWORD nFileSizeLow;
+  DWORD dwReserved0;
+  DWORD dwReserved1;
+  char cFileName[260];
+  char cAlternateFileName[14];
+  DWORD dwFileType;
+  DWORD dwCreatorType;
+  WORD  wFinderFlags;
+} WIN32_FIND_DATAA;
+
+HANDLE FindFirstFileA(const char* lpFileName, WIN32_FIND_DATAA* lpFindFileData);
+WINBOOL FindNextFileA (HANDLE hFindFile, WIN32_FIND_DATAA* lpFindFileData);
+WINBOOL FindClose (HANDLE hFindFile);
+
 static const int FILE_ATTRIBUTE_DIRECTORY = 16;
 ]]
 
@@ -44,6 +72,7 @@ local _M = {}
 
 local WIN_FALSE = 0
 local PATH_MAX = 4096
+local INVALID_HANDLE_VALUE = ffi_cast("HANDLE", -1)
 
 function _M.exists_file(filepath)
   local rv = C.GetFileAttributesA(filepath)
@@ -125,6 +154,33 @@ function _M.attributes(filepath, aname)
 end
 
 function _M.list_dir(pathname, filter, rec)
+  local search_pat = pathname .. "\\*"
+  local p_ffd = ffi_new("WIN32_FIND_DATAA[1]")
+  local h = C.FindFirstFileA(search_pat, p_ffd)
+  if h == INVALID_HANDLE_VALUE then
+    return {}
+  end
+
+  local out = {}
+  repeat
+    local fn = ffi_str(p_ffd[0].cFileName)
+    if fn ~= "." and fn ~= ".." then
+      local is_valid = true
+      if filter == "file" and bit.band(p_ffd[0].dwFileAttributes, C.FILE_ATTRIBUTE_DIRECTORY) ~= 0 then
+        is_valid = false
+      elseif filter == "directory" and bit.band(p_ffd[0].dwFileAttributes, C.FILE_ATTRIBUTE_DIRECTORY) == 0 then
+        is_valid = false
+      end
+      if is_valid then
+        tinsert(out, fn)
+      end
+    end
+  until C.FindNextFileA(h, p_ffd) == WIN_FALSE
+  C.FindClose(h)
+  return out
+end
+
+function _M._list_dir(pathname, filter, rec)
   local cmds = { "dir /B" }
   if filter == "file" then
     tinsert(cmds, "/A:-D")
