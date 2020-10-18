@@ -202,10 +202,14 @@ static const int EEM_GETACTIVETEXT = WM_USER + 3000;
 static const int EEM_LOADFILE = WM_USER + 3002;
 static const int EEM_SETHOOK = WM_USER + 3003;
 static const int EEM_GETFRAMELIST = WM_USER + 3005;
+static const int EEM_SETACTIVEVIEW = WM_USER + 3006;
 static const int EEM_UPDATEUIELEMENT = WM_USER + 3009;
 static const int EEM_OUTPUTTEXT = WM_USER + 3010;
+static const int EEM_GETOUTPUTHWND = WM_USER + 3011;
+static const int EEM_GETDOCFROMFRAME = WM_USER + 3012;
+static const int EEM_GETFRAMETYPE = WM_USER + 3017;
 static const int EEM_GETFRAMEPATH = WM_USER + 3018;
-static const int EEM_GETACTIVEFRAME = WM_USER + 3018;
+static const int EEM_GETACTIVEFRAME = WM_USER + 3019;
 static const int EEM_SWOWDIALOG = WM_USER + 3021;
 
 static const int EEHOOK_APPMSG = 7;
