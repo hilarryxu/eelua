@@ -25,6 +25,11 @@ run_eelua_init(lua_State *L)
 {
     char fn[] = "./eelua/eelua_init.lua";
     int rc = luaL_dofile(L, fn);
+    if (rc != 0) {
+        const char *msg = lua_tostring(L, -1);
+        ReportLuaWarn(msg);
+        lua_pop(L, 1);
+    }
     return rc;
 }
 
