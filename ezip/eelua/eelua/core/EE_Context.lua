@@ -28,7 +28,7 @@ local mt = {
   end
 }
 
-function _M:api_call(hwnd, msg, wparam, lparam)
+function _M:send_message(msg, wparam, lparam)
   return C.SendMessageA(self.hMain, msg, wparam or 0, lparam or 0)
 end
 
@@ -43,8 +43,8 @@ end
 
 function _M:open_doc(filepath, codepage, view_type)
   local p = ffi_new("EE_LoadFile[1]")
-  p[0].nCodepage = codepage or 0
-  p[0].nViewType = view_type or 1
+  p[0].nCodepage = codepage or C.CODEPAGE_AUTO
+  p[0].nViewType = view_type or C.VIEWTYPE_TEXT
   local hwnd = ffi_cast("HWND", send_message(self.hMain, C.EEM_LOADFILE, unicode.a2w(filepath), p))
   return EE_Document.new(hwnd)
 end

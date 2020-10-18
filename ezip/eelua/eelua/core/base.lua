@@ -224,6 +224,16 @@ static const int EE_UI_REMOVE = 0;
 static const int EE_UI_ADD = 1;
 static const int EE_UI_ENABLE = 2;
 static const int EE_UI_SETCHECK = 3;
+
+static const int CODEPAGE_AUTO = 1;
+
+static const int VIEWTYPE_UNKNOWN = 0;
+static const int VIEWTYPE_TEXT = 1;
+static const int VIEWTYPE_HEX = 2;
+
+static const int FRAMETYPE_UNKNOWN = 0;
+static const int FRAMETYPE_TEXT = 1;
+static const int FRAMETYPE_HEX = 2;
 ]]
 
 eelua.C = C
