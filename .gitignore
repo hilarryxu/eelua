@@ -1,6 +1,7 @@
 bin/
 obj/
 
+*.ezip
 *.make
 Makefile
 lib/lua51.dll

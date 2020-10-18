@@ -195,6 +195,9 @@ static const int ECM_HASSEL = WM_USER + 33;
 static const int ECM_GETSEL = WM_USER + 34;
 static const int ECM_GETTEXT = WM_USER + 35;
 static const int ECM_GETSELTEXT = WM_USER + 40;
+static const int ECM_SETPOS = WM_USER + 46;
+static const int ECM_GETBUFFERENCODING = WM_USER + 63;
+static const int ECM_COMMENTLINE = WM_USER + 69;
 static const int ECM_REDRAW = WM_USER + 74;
 
 static const int EEM_EXCUTESCRIPT = WM_USER + 1203;
@@ -234,6 +237,11 @@ static const int VIEWTYPE_HEX = 2;
 static const int FRAMETYPE_UNKNOWN = 0;
 static const int FRAMETYPE_TEXT = 1;
 static const int FRAMETYPE_HEX = 2;
+
+static const int EC_EOL_NULL = 0;
+static const int EC_EOL_WIN = 1;
+static const int EC_EOL_UNIX = 2;
+static const int EC_EOL_MAC = 3;
 ]]
 
 eelua.C = C
