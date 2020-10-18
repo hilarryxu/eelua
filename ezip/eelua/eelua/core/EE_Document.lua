@@ -62,8 +62,8 @@ end
 
 function _M:set_cursor(cursor, visible)
   local p_pos = ffi_new("EC_Pos[1]")
-  p_pos.line = cursor.line
-  p_pos.col = cursor.col
+  p_pos[0].line = cursor.line
+  p_pos[0].col = cursor.col
 
   send_message(self.hwnd, C.ECM_SETPOS, p_pos, visible and 1 or 0)
 end
@@ -78,6 +78,20 @@ function _M:getline(lnum)
   end
   local wtext = ffi_cast("wchar_t*", send_message(self.hwnd, C.ECM_GETLINEBUF, lnum))
   return unicode.w2a(wtext, C.lstrlenW(wtext))
+end
+
+function _M:setline(lnum, text)
+  if lnum == "." then
+    lnum = self.cursor.line
+  elseif lnum < 1 or lnum > self.line_nr then
+    return false
+  else
+    lnum = lnum - 1
+  end
+
+  self:set_cursor({ line = lnum, col = 0 })
+  self:send_command(80)  -- ECC_DELTOLINETAIL
+  self:insert(text)
 end
 
 function _M:get_fullpath()
