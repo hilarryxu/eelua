@@ -10,11 +10,13 @@
 
 #include "eesdk.h"
 
+#define EELUA_VERSION       "eelua 0.2"
+#define EELUA_RELEASE       "eelua 0.2.0"
+#define EELUA_VERSION_NUM   2  // (maj) * 1000) + min
+
 #ifdef _MSC_VER
 #define snprintf  _snprintf
 #define PATH_MAX  _MAX_PATH
 #endif
-
-// #define EELUA_INTERNAL_UTF8  1
 
 #endif  // EELUA_CONFIG_H_
