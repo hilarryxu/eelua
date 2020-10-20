@@ -23,6 +23,12 @@ local mt = {
       return _M.get_fullpath(self)
     elseif k == "line_nr" then
       return tonumber(send_message(self.hwnd, C.ECM_GETLINECNT))
+    elseif k == "visual_line_nr" then
+      return tonumber(send_message(self.hwnd, C.ECM_GETVISUALLINECOUNT))
+    elseif k == "font_height" then
+      return tonumber(send_message(self.hwnd, C.ECM_GETFONTHEIGHT))
+    elseif k == "edit_mode" then
+      return tonumber(send_message(self.hwnd, C.ECM_EDITMODE, 0xFF))
     elseif k == "sel_type" then
       return _M.get_sel_type(self)
     elseif k == "text" then
@@ -30,7 +36,7 @@ local mt = {
     elseif k == "sel_text" then
       return _M.get_sel_text(self)
     elseif k == "eol_type" then
-      return tonumber(send_message(self.hwnd, C.ECM_SETEOLTYPE, 0x7F))
+      return tonumber(send_message(self.hwnd, C.ECM_SETEOLTYPE, 0xFF))
     elseif k == "encoding" then
       return tonumber(send_message(self.hwnd, C.ECM_GETBUFFERENCODING, 0))
     end
@@ -41,7 +47,13 @@ local mt = {
       _M.delete(self)
       _M.insert(self, v)
     elseif k == "eol_type" then
-      send_message(self.hwnd, C.ECM_SETEOLTYPE, eol_type)
+      send_message(self.hwnd, C.ECM_SETEOLTYPE, v)
+    elseif k == "edit_mode" then
+      send_message(self.hwnd, C.ECM_EDITMODE, v)
+    elseif k == "wrap_mode" then
+      send_message(self.hwnd, C.ECM_WRAP, v)
+    elseif k == "fold_method" then
+      send_message(self.hwnd, C.ECM_SETFOLDMETHOD, v)
     elseif k == "encoding" then
       send_message(self.hwnd, C.ECM_GETBUFFERENCODING, 1, v)
     else
@@ -71,10 +83,8 @@ end
 function _M:getline(lnum)
   if lnum == "." then
     lnum = self.cursor.line
-  elseif lnum < 1 or lnum > self.line_nr then
+  elseif lnum < 0 or lnum >= self.line_nr then
     return ""
-  else
-    lnum = lnum - 1
   end
   local wtext = ffi_cast("wchar_t*", send_message(self.hwnd, C.ECM_GETLINEBUF, lnum))
   return unicode.w2a(wtext, C.lstrlenW(wtext))
@@ -83,10 +93,8 @@ end
 function _M:setline(lnum, text)
   if lnum == "." then
     lnum = self.cursor.line
-  elseif lnum < 1 or lnum > self.line_nr then
+  elseif lnum < 0 or lnum >= self.line_nr then
     return false
-  else
-    lnum = lnum - 1
   end
 
   self:set_cursor({ line = lnum, col = 0 })
@@ -202,8 +210,7 @@ function _M:get_sel_text()
 end
 
 function _M:is_dirty()
-  local val = tonumber(send_message(self.hwnd, C.ECM_ISDOCDIRTY))
-  return val ~= 0
+  return tonumber(send_message(self.hwnd, C.ECM_ISDOCDIRTY)) ~= 0
 end
 
 function _M:comment_line(comment, yes_or_no)
@@ -211,6 +218,59 @@ function _M:comment_line(comment, yes_or_no)
                            unicode.a2w(comment),
                            yes_or_no and 1 or 0)
   return val ~= 0
+end
+
+function _M:can_undo()
+  return tonumber(send_message(self.hwnd, C.ECM_CANUNDO)) ~= 0
+end
+
+function _M:can_redo()
+  return tonumber(send_message(self.hwnd, C.ECM_CANREDO)) ~= 0
+end
+
+function _M:force_caret_visible()
+  send_message(self.hwnd, C.ECM_FORCECARETVISIBLE)
+end
+
+function _M:move_cursor(offset)
+  send_message(self.hwnd, C.ECM_MOVECARET, offset)
+end
+
+function _M:get_wrap_count(lnum)
+  return tonumber(send_message(self.hwnd, C.ECM_WRAPCOUNT, lnum))
+end
+
+function _M:insert_snippet(text)
+  local wtext, wlen = unicode.a2w(text)
+  send_message(self.hwnd, C.ECM_INSERTSNIPPET, wtext, wlen)
+end
+
+function _M:clear_dirty()
+  send_message(self.hwnd, C.ECM_CLEARDIRTY)
+end
+
+function _M:get_scope()
+  local wtext = ffi_cast("wchar_t*", send_message(self.hwnd, C.ECM_GETSCOPE))
+  local text = unicode.w2a(wtext, C.lstrlenW(wtext))
+  return text
+end
+
+function _M:is_loading()
+  return tonumber(send_message(self.hwnd, C.ECM_ISLOADING)) ~= 0
+end
+
+function _M:close_tag()
+  return tonumber(send_message(self.hwnd, C.ECM_CLOSETAG)) ~= 0
+end
+
+function _M:op_bookmark(op, lnum)
+  if op == "get" then
+    return tonumber(send_message(self.hwnd, C.ECM_BOOKMARKER, 2, lnum))
+  elseif op == "set" then
+    send_message(self.hwnd, C.ECM_BOOKMARKER, 1, lnum)
+  elseif op == "del" then
+    send_message(self.hwnd, C.ECM_BOOKMARKER, 0, lnum)
+  end
 end
 
 ffi.metatype("EE_Document", mt)
