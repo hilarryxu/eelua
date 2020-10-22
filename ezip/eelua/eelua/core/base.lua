@@ -172,15 +172,41 @@ BOOL GlobalUnlock(
   HANDLE hMem
 );
 
+typedef struct tagLVITEMA {
+  UINT mask;
+  int iItem;
+  int iSubItem;
+  UINT state;
+  UINT stateMask;
+  const char *pszText;
+  int cchTextMax;
+  int iImage;
+  LPARAM lParam;
+  int iIndent;
+  int iGroupId;
+  UINT cColumns;
+  UINT_PTR puColumns;
+  int *piColFmt;
+  int iGroup;
+} LVITEMA;
+
 typedef int (*pfnOnRunningCommand)(const wchar_t* command, int length);
 typedef int (*pfnOnAppMessage)(UINT uMsg, WPARAM wp, LPARAM lp);
 typedef int (*pfnOnPreExecuteScript)(const wchar_t* pathname);
+typedef int (*pfnOnListPluginCommand)(HWND hwnd);
+typedef int (*pfnOnExecutePluginCommand)(const wchar_t* command);
 
 static const int INT_MAX = 2147483647;
 static const int INT_MIN = -2147483648;
 
 static const int WM_USER = 1024;
 static const int WM_COMMAND = 0x0111;
+
+static const int LVM_FIRST = 0x1000;
+static const int LVM_GETITEMCOUNT = LVM_FIRST + 4;
+static const int LVM_INSERTITEMA = LVM_FIRST + 7;
+static const int LVM_SETITEMTEXTA = LVM_FIRST + 46;
+static const int LVIF_TEXT = 1;
 
 static const int ECM_CANUNDO = WM_USER + 1;
 static const int ECM_CANREDO = WM_USER + 2;
@@ -236,6 +262,8 @@ static const int EEHOOK_APPMSG = 7;
 static const int EEHOOK_IDLE = 8;
 static const int EEHOOK_RUNCOMMAND = 13;
 static const int EEHOOK_TEXTIDLE = 27;
+static const int EEHOOK_LISTPLUGINCOMMAND = 29;
+static const int EEHOOK_EXECUTEPLUGINCOMMAND = 30;
 static const int EEHOOK_PREEXECUTESCRIPT = 108;
 
 static const int EEHOOK_RET_DONTROUTE = 0xBC614E;

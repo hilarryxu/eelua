@@ -101,6 +101,48 @@ OnPreExecuteScript = ffi_cast("pfnOnPreExecuteScript", function(wpathname)
   return 0
 end)
 
+OnListPluginCommand = ffi_cast("pfnOnListPluginCommand", function(hwnd)
+  local row = tonumber(base.send_message(hwnd, C.LVM_GETITEMCOUNT))
+  local p_item = ffi_new("LVITEMA[0]")
+
+  p_item[0].mask = C.LVIF_TEXT
+  p_item[0].iItem = row
+  p_item[0].iSubItem = 0
+  p_item[0].pszText = ""
+  base.send_message(hwnd, C.LVM_INSERTITEMA, 0, p_item)
+
+  p_item[0].iSubItem = 1
+  p_item[0].pszText = "pl_eelua_execute_current_file"
+  base.send_message(hwnd, C.LVM_SETITEMTEXTA, row, p_item)
+
+  p_item[0].iSubItem = 2
+  p_item[0].pszText = "Execute current lua script file"
+  base.send_message(hwnd, C.LVM_SETITEMTEXTA, row, p_item)
+
+  return 0
+end)
+
+OnExecutePluginCommand = ffi_cast("pfnOnExecutePluginCommand", function(wcommand)
+  local command = unicode.w2a(wcommand, C.lstrlenW(wcommand))
+  _p("command: %s", command)
+
+  if command == "pl_eelua_execute_current_file" then
+    local fn = App.active_doc.fullpath
+    if fn ~= "" and not fn:contains([[eelua\scripts\F5.lua]]) then
+      if fn:endswith(".lua") then
+        local okay, chunk = pcall(dofile, fn)
+        if not okay then
+          _p("ERR: RunScript: %s", chunk)
+        end
+      end
+    end
+  end
+
+  return 0
+end)
+
 ee_context:set_hook(C.EEHOOK_RUNCOMMAND, OnRunningCommand)
 ee_context:set_hook(C.EEHOOK_APPMSG, OnAppMessage)
 ee_context:set_hook(C.EEHOOK_PREEXECUTESCRIPT, OnPreExecuteScript)
+ee_context:set_hook(C.EEHOOK_LISTPLUGINCOMMAND, OnListPluginCommand)
+ee_context:set_hook(C.EEHOOK_EXECUTEPLUGINCOMMAND, OnExecutePluginCommand)
