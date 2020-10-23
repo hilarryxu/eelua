@@ -65,7 +65,7 @@ end
 
 function _M:next_cmd_id()
   self.dwCommand = self.dwCommand + 1
-  return self.dwCommand
+  return tonumber(self.dwCommand)
 end
 
 function _M:execute_script(script_fn, just_execute)
