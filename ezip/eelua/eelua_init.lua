@@ -52,6 +52,18 @@ local app_path_strbuf = base.get_string_buf()
 C.GetModuleFileNameA(App.hModule, app_path_strbuf, base.get_string_buf_size())
 eelua.app_path = path.getdirectory(path.getabsolute(ffi_str(app_path_strbuf)))
 
+function eelua.add_event_handler(event, handler)
+  event_bus:add_event_handler(event, handler)
+end
+
+function eelua.remove_event_handler(event, handler)
+  return event_bus:remove_event_handler(event, handler)
+end
+
+function eelua.remove_all_event_handlers(event)
+  event_bus:remove_all_event_handlers(event)
+end
+
 local _plugin_commands = {}
 function eelua.add_plugin_command(opts)
   tinsert(_plugin_commands, opts)
@@ -293,14 +305,6 @@ local OnPrePopupTextMenu = ffi_cast("pfn_OnPrePopupTextMenu", function(doc_hwnd,
   }, true)
   return 0
 end)
-
--- event_bus:add_event_handler("OnPrePopupTextMenu", function(doc, menu)
---   local cmd_id = App:next_cmd_id()
---   menu:add_item(cmd_id, "Test")
---   eelua.register_wm_command(cmd_id, function()
---     print("test", cmd_id)
---   end)
--- end)
 
 if #_console_commands > 0 then
   App:set_hook(C.EEHOOK_RUNCOMMAND, OnRunningCommand)
