@@ -63,6 +63,9 @@ local mt = {
 }
 
 function _M.new(hwnd)
+  if tonumber(hwnd) == 0 then
+    return nil
+  end
   return ffi_new("EE_Document", { hwnd })
 end
 

@@ -23,6 +23,8 @@ local mt = {
       return _M.get_active_frame(self)
     elseif k == "frames" then
       return _M.get_frames(self)
+    elseif k == "app_metrics" then
+      return tonumber(send_message(self.hMain, C.EEM_GETAPPMETRICS))
     end
     return _M[k]
   end
@@ -73,7 +75,7 @@ function _M:execute_script(script_fn, just_execute)
   send_message(self.hMain, C.EEM_EXCUTESCRIPT, wstr, just_execute and 1 or 0)
 end
 
-function _M:update_uielement(cmd_id, action, value)
+function _M:update_ui_element(cmd_id, action, value)
   local p = ffi_new("EE_UpdateUIElement[1]")
   p[0].action = action
   p[0].value = value or 0
@@ -105,13 +107,16 @@ function _M:set_active_frame(index)
   return rc == 1
 end
 
-function _M:get_frames()
-  local p_hwnds = ffi_new("HWND[1025]")
+function _M:get_frames(hwnd_sz)
+  hwnd_sz = hwnd_sz or 1024
+  local p_hwnds = ffi_new("HWND[?]", hwnd_sz + 1)
+
   local count = tonumber(send_message(self.hMain, C.EEM_GETFRAMELIST, p_hwnds))
   local frames = {}
   for i = 0, count - 1 do
     tinsert(frames, EE_Frame.new(p_hwnds[i]))
   end
+
   return frames
 end
 
@@ -120,8 +125,10 @@ function _M:get_doc_from_frame(frame_hwnd)
   return EE_Document.new(hwnd)
 end
 
-function _M:get_doc(index)
-  local p_hwnds = ffi_new("HWND[1025]")
+function _M:get_doc(index, hwnd_sz)
+  hwnd_sz = hwnd_sz or 1024
+  local p_hwnds = ffi_new("HWND[?]", hwnd_sz + 1)
+
   local count = tonumber(send_message(self.hMain, C.EEM_GETFRAMELIST, p_hwnds))
   if index > count then
     return nil
@@ -129,8 +136,18 @@ function _M:get_doc(index)
   return self:get_doc_from_frame(p_hwnds[index - 1])
 end
 
-function _M:show_dialog(dlg_id, settings)
-  send_message(self.hMain, C.EEM_SWOWDIALOG, dlg_id, settings or "")
+function _M:get_view_type(frame_hwnd)
+  return tonumber(send_message(self.hMain, C.EEM_SETVIEWTYPE, frame_hwnd, 0xFF))
+end
+
+function _M:set_view_type(frame_hwnd, value)
+  send_message(self.hMain, C.EEM_SETVIEWTYPE, frame_hwnd, value)
+end
+
+function _M:get_frame_from_path(path)
+  local wpath, wlen = unicode.a2w(path)
+  local frame_hwnd = tonumber(send_message(self.hMain, C.EEM_GETFRAMEFROMPATH, wpath))
+  return EE_Frame.new(frame_hwnd)
 end
 
 ffi.metatype("EE_Context", mt)
