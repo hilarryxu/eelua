@@ -20,16 +20,15 @@ local C = ffi.C
 local ffi_new = ffi.new
 local ffi_str = ffi.string
 local ffi_cast = ffi.cast
+local unpack = unpack or table.unpack
 local str_fmt = string.format
 local tinsert = table.insert
 local tconcat = table.concat
-local _p = eelua.printf
 
 ---
 -- globals
 ---
-ee_context = ffi_cast("EE_Context*", eelua._ee_context)
-App = ee_context
+App = ffi_cast("EE_Context*", eelua._ee_context)
 local bus = EventBus.new()
 
 print = function(...)
@@ -49,8 +48,7 @@ end
 
 local app_path_strbuf = base.get_string_buf()
 C.GetModuleFileNameA(App.hModule, app_path_strbuf, base.get_string_buf_size())
-local app_path = path.getdirectory(path.getabsolute(ffi_str(app_path_strbuf)))
-eelua.app_path = app_path
+eelua.app_path = path.getdirectory(path.getabsolute(ffi_str(app_path_strbuf)))
 
 local _plugin_commands = {}
 function eelua.add_plugin_command(opts)
@@ -69,9 +67,9 @@ eelua.add_plugin_command {
     local fn = App.active_doc.fullpath
     if fn ~= "" and not fn:contains([[eelua\scripts\F5.lua]]) then
       if fn:endswith(".lua") then
-        local okay, msg = pcall(dofile, fn)
-        if not okay then
-          err("ERR: RunScript: %s", msg)
+        local ok, errmsg = pcall(dofile, fn)
+        if not ok then
+          err("ERR: RunScript: %s", errmsg)
         end
       end
     end
@@ -82,7 +80,7 @@ eelua.add_console_command {
   match = "^lua$",
   desc = "Run a chunk of lua code",
   func = function(name, cmdline)
-    local chunk, errmsg = loadstring(cmdline, "=cmdline")
+    local chunk, errmsg = load(cmdline, "=cmdline")
     if not chunk then
       err("ERR: cmdline lua: %s", errmsg)
       return
@@ -97,11 +95,11 @@ eelua.add_console_command {
 ---
 -- load eeluarc.lua
 ---
-local eeluarc_fpath = path.join(app_path, [[eelua\eeluarc.lua]])
+local eeluarc_fpath = path.join(eelua.app_path, [[eelua\eeluarc.lua]])
 if lfs.exists_file(eeluarc_fpath) then
-  local okay, msg = pcall(dofile, eeluarc_fpath)
-  if not okay then
-    err("ERR: load eeluarc.lua: %s", msg)
+  local ok, errmsg = pcall(dofile, eeluarc_fpath)
+  if not ok then
+    err("ERR: load eeluarc.lua: %s", errmsg)
   end
 end
 
@@ -109,13 +107,13 @@ end
 ---
 -- load plugins
 ---
-local plugins_dir = path.join(app_path, [[eelua\plugins]])
+local plugins_dir = path.join(eelua.app_path, [[eelua\plugins]])
 for _, v in ipairs(lfs.list_dir(plugins_dir, "file")) do
   if v:endswith(".lua") then
     local fn = path.join(plugins_dir, v)
-    local okay, msg = pcall(dofile, fn)
-    if not okay then
-      err("ERR: LoadPlugin: %s", msg)
+    local ok, errmsg = pcall(dofile, fn)
+    if not ok then
+      err("ERR: LoadPlugin: %s", errmsg)
     end
   end
 end
@@ -126,14 +124,14 @@ end
 ---
 eelua.main_menu = Menu.new(App.hMainMenu)
 eelua.plugin_menu = Menu.new(App.hPluginMenu)
-eelua.scripts = {}
+eelua._scripts = {}
 local script_menu = Menu.new()
 local scripts_dir = path.join(eelua.app_path, [[eelua\scripts]])
 for _, v in ipairs(lfs.list_dir(scripts_dir, "file")) do
   if v:endswith(".lua") then
     local cmd_id = App:next_cmd_id()
     local snr = str_fmt("SNR_%s", tonumber(cmd_id))
-    eelua.scripts[snr] = path.join(scripts_dir, v)
+    eelua._scripts[snr] = path.join(scripts_dir, v)
     script_menu:add_item(cmd_id, v)
   end
 end
@@ -150,8 +148,8 @@ OnDoFile = function(ctx, rect, wtext)
   assert(nparams > 0)
 
   local filepath = path.join(eelua.app_path, params[1])
-  local okay, chunk = pcall(dofile, filepath)
-  if not okay then
+  local ok, chunk = pcall(dofile, filepath)
+  if not ok then
     err("ERR: OnDoFile: %s", chunk)
     return
   end
@@ -173,11 +171,9 @@ OnRunningCommand = ffi_cast("pfnOnRunningCommand", function(wcommand, wlen)
   for i, cmd in ipairs(_console_commands) do
     if name:match(cmd.match) then
       local ok, errmsg = pcall(cmd.func, name, cmdline)
-      print("pcall", ok, errmsg)
       if not ok then
         err("ERR: RunningCommand: %s", errmsg)
       end
-      print("return ", C.EEHOOK_RET_DONTROUTE)
       return C.EEHOOK_RET_DONTROUTE
     end
   end
@@ -191,10 +187,10 @@ OnAppMessage = ffi_cast("pfnOnAppMessage", function(msg, wparam, lparam)
       cmd_id = cmd_id - 65536
     end
     local snr = str_fmt("SNR_%s", cmd_id)
-    local script_path = eelua.scripts[snr]
+    local script_path = eelua._scripts[snr]
     if script_path then
-      local okay, errmsg = pcall(dofile, script_path)
-      if not okay then
+      local ok, errmsg = pcall(dofile, script_path)
+      if not ok then
         err("ERR: RunScript: %s", errmsg)
       end
     end
@@ -205,8 +201,8 @@ end)
 OnPreExecuteScript = ffi_cast("pfnOnPreExecuteScript", function(wpathname)
   local pathname = unicode.w2a(wpathname, C.lstrlenW(wpathname))
   if pathname:endswith(".lua") then
-    local okay, msg = pcall(dofile, pathname)
-    if not okay then
+    local ok, msg = pcall(dofile, pathname)
+    if not ok then
       err("ERR: OnPreExecuteScript: %s", msg)
     end
     return C.EEHOOK_RET_DONTROUTE
