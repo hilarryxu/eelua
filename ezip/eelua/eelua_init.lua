@@ -9,6 +9,7 @@ require "eelua.core"
 require "eelua.stdext"
 require "eelua.utils"
 local base = require "eelua.core.base"
+local EE_Document = require "eelua.core.EE_Document"
 local Menu = require "eelua.core.Menu"
 local print_r = require "print_r"
 local unicode = require "unicode"
@@ -29,7 +30,8 @@ local tconcat = table.concat
 -- globals
 ---
 App = ffi_cast("EE_Context*", eelua._ee_context)
-local bus = EventBus.new()
+local event_bus = EventBus.new()
+eelua.event_bus = event_bus
 
 print = function(...)
   local out = {}
@@ -58,6 +60,16 @@ end
 local _console_commands = {}
 function eelua.add_console_command(opts)
   tinsert(_console_commands, opts)
+end
+
+local _wm_commands = {}
+function eelua.register_wm_command(cmd_id, opts)
+  if type(opts) == "function" then
+    opts = { func = opts }
+  end
+  opts = opts or {}
+  opts.cmd_id = cmd_id
+  _wm_commands[tostring(cmd_id)] = opts
 end
 
 eelua.add_plugin_command {
@@ -124,15 +136,16 @@ end
 ---
 eelua.main_menu = Menu.new(App.hMainMenu)
 eelua.plugin_menu = Menu.new(App.hPluginMenu)
-eelua._scripts = {}
 local script_menu = Menu.new()
 local scripts_dir = path.join(eelua.app_path, [[eelua\scripts]])
 for _, v in ipairs(lfs.list_dir(scripts_dir, "file")) do
   if v:endswith(".lua") then
     local cmd_id = App:next_cmd_id()
-    local snr = str_fmt("SNR_%s", tonumber(cmd_id))
-    eelua._scripts[snr] = path.join(scripts_dir, v)
     script_menu:add_item(cmd_id, v)
+    eelua.register_wm_command(cmd_id, {
+      type = "_script",
+      script_path = path.join(scripts_dir, v)
+    })
   end
 end
 eelua.plugin_menu:add_subitem("lua scripts", script_menu)
@@ -186,15 +199,30 @@ OnAppMessage = ffi_cast("pfnOnAppMessage", function(msg, wparam, lparam)
     if cmd_id >= 65536 + 40000 then
       cmd_id = cmd_id - 65536
     end
-    local snr = str_fmt("SNR_%s", cmd_id)
-    local script_path = eelua._scripts[snr]
-    if script_path then
-      local ok, errmsg = pcall(dofile, script_path)
-      if not ok then
-        err("ERR: RunScript: %s", errmsg)
+
+    local cmd_info = _wm_commands[tostring(cmd_id)]
+    if cmd_info then
+      local cmd_type = cmd_info.type or "default"
+      if cmd_type == "_script" then
+        local script_path = cmd_info.script_path
+        if script_path then
+          local ok, errmsg = pcall(dofile, script_path)
+          if not ok then
+            err("ERR: RunMenuScript: %s", errmsg)
+          end
+        end
+      elseif cmd_type == "default" then
+        local handler = cmd_info.func
+        if handler then
+          local ok, errmsg = pcall(handler)
+          if not ok then
+            err("ERR: RunCmdHandler: %s", errmsg)
+          end
+        end
       end
     end
   end
+
   return 0
 end)
 
@@ -257,6 +285,23 @@ OnExecutePluginCommand = ffi_cast("pfnOnExecutePluginCommand", function(wcommand
   return 0
 end)
 
+local OnPrePopupTextMenu = ffi_cast("pfn_OnPrePopupTextMenu", function(doc_hwnd, hmenu, x, y)
+  local doc = EE_Document.new(doc_hwnd)
+  local menu = Menu.new(hmenu)
+  event_bus:run_event_handlers("OnPrePopupTextMenu", {
+    doc, menu, x, y
+  }, true)
+  return 0
+end)
+
+-- event_bus:add_event_handler("OnPrePopupTextMenu", function(doc, menu)
+--   local cmd_id = App:next_cmd_id()
+--   menu:add_item(cmd_id, "Test")
+--   eelua.register_wm_command(cmd_id, function()
+--     print("test", cmd_id)
+--   end)
+-- end)
+
 if #_console_commands > 0 then
   App:set_hook(C.EEHOOK_RUNCOMMAND, OnRunningCommand)
 end
@@ -265,4 +310,7 @@ App:set_hook(C.EEHOOK_PREEXECUTESCRIPT, OnPreExecuteScript)
 if #_plugin_commands > 0 then
   App:set_hook(C.EEHOOK_LISTPLUGINCOMMAND, OnListPluginCommand)
   App:set_hook(C.EEHOOK_EXECUTEPLUGINCOMMAND, OnExecutePluginCommand)
+end
+if event_bus:get_handle_count("OnPrePopupTextMenu") > 0 then
+  App:set_hook(C.EEHOOK_PRETEXTMENU, OnPrePopupTextMenu)
 end

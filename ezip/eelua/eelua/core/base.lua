@@ -195,6 +195,7 @@ typedef int (*pfnOnAppMessage)(UINT uMsg, WPARAM wp, LPARAM lp);
 typedef int (*pfnOnPreExecuteScript)(const wchar_t* pathname);
 typedef int (*pfnOnListPluginCommand)(HWND hwnd);
 typedef int (*pfnOnExecutePluginCommand)(const wchar_t* command);
+typedef int (*pfn_OnPrePopupTextMenu)(HWND doc, HMENU menu, int x, int y);
 
 static const int INT_MAX = 2147483647;
 static const int INT_MIN = -2147483648;
@@ -260,6 +261,7 @@ static const int EEM_GETFRAMEPATH = WM_USER + 3018;
 static const int EEM_GETACTIVEFRAME = WM_USER + 3019;
 static const int EEM_GETAPPMETRICS = WM_USER + 3023;
 
+static const int EEHOOK_PRETEXTMENU = 1;
 static const int EEHOOK_APPMSG = 7;
 static const int EEHOOK_IDLE = 8;
 static const int EEHOOK_RUNCOMMAND = 13;

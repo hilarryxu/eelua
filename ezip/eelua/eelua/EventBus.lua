@@ -1,4 +1,11 @@
+local ffi = require "ffi"
+local string = require "string"
 local table = require "table"
+
+local C = ffi.C
+local str_fmt = string.format
+local unpack = unpack or table.unpack
+local tinsert = table.insert
 
 local _M = {}
 
@@ -25,6 +32,7 @@ local mt = {
 function _M.new()
   local self = {
     handle_map = {},
+    runned_handlers = {}
   }
   setmetatable(self, mt)
   return self
@@ -41,8 +49,8 @@ end
 function _M:add_event_handler(event, handler)
   local handlers = self.handle_map[event]
   if handlers == nil then
-    handles = {}
-    self.handle_map[event] = handles
+    handlers = {}
+    self.handle_map[event] = handlers
   end
 
   tinsert(handlers, handler)
@@ -51,8 +59,8 @@ end
 function _M:remove_event_handler(event, handler)
   local handlers = self.handle_map[event]
   if handlers == nil then
-    handles = {}
-    self.handle_map[event] = handles
+    handlers = {}
+    self.handle_map[event] = handlers
     return false
   end
 
@@ -61,6 +69,28 @@ end
 
 function _M:remove_all_event_handlers(event)
   self.handle_map[event] = {}
+end
+
+function _M:run_event_handlers(event, args, once)
+  local handlers = self.handle_map[event]
+  if handlers then
+    for _, handler in ipairs(handlers) do
+      if not once or (once and not self.runned_handlers[handler]) then
+        local ok, rv = pcall(handler, unpack(args or {}))
+        if once then
+          self.runned_handlers[handler] = true
+        end
+
+        if not ok then
+          App:output_line(str_fmt("ERR: RunEventHandler(%s): %s", event, rv))
+        else
+          if rv == C.EEHOOK_RET_DONTROUTE then
+            break
+          end
+        end
+      end
+    end
+  end
 end
 
 return _M
