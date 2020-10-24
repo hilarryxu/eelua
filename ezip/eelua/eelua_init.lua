@@ -57,6 +57,11 @@ function eelua.add_plugin_command(opts)
   tinsert(_plugin_commands, opts)
 end
 
+local _console_commands = {}
+function eelua.add_console_command(opts)
+  tinsert(_console_commands, opts)
+end
+
 eelua.add_plugin_command {
   name = "pl_eelua_execute_current_file",
   desc = "Execute current lua script file",
@@ -73,6 +78,21 @@ eelua.add_plugin_command {
   end
 }
 
+eelua.add_console_command {
+  match = "^lua$",
+  desc = "Run a chunk of lua code",
+  func = function(name, cmdline)
+    local chunk, errmsg = loadstring(cmdline, "=cmdline")
+    if not chunk then
+      err("ERR: cmdline lua: %s", errmsg)
+      return
+    end
+    local ok, errmsg = pcall(chunk)
+    if not ok then
+      err("ERR: cmdline lua: %s", errmsg)
+    end
+  end
+}
 
 ---
 -- load eeluarc.lua
@@ -142,7 +162,25 @@ OnDoFile = function(ctx, rect, wtext)
 end
 
 OnRunningCommand = ffi_cast("pfnOnRunningCommand", function(wcommand, wlen)
-  _p("command: %s", unicode.w2a(wcommand, wlen))
+  local command = unicode.w2a(wcommand, wlen)
+  local name, cmdline = command
+  local space_idx = command:find(" ", 1, true)
+  if space_idx then
+    name = command:sub(1, space_idx - 1)
+    cmdline = command:sub(space_idx + 1)
+  end
+
+  for i, cmd in ipairs(_console_commands) do
+    if name:match(cmd.match) then
+      local ok, errmsg = pcall(cmd.func, name, cmdline)
+      print("pcall", ok, errmsg)
+      if not ok then
+        err("ERR: RunningCommand: %s", errmsg)
+      end
+      print("return ", C.EEHOOK_RET_DONTROUTE)
+      return C.EEHOOK_RET_DONTROUTE
+    end
+  end
   return 0
 end)
 
@@ -213,14 +251,19 @@ OnExecutePluginCommand = ffi_cast("pfnOnExecutePluginCommand", function(wcommand
   local command = unicode.w2a(wcommand, C.lstrlenW(wcommand))
   for i, cmd in ipairs(_plugin_commands) do
     if cmd.name == command then
-      cmd.func()
+      local ok, errmsg = pcall(cmd.func)
+      if not ok then
+        err("ERR: ExecutePluginCommand: %s", errmsg)
+      end
       return C.EEHOOK_RET_DONTROUTE
     end
   end
   return 0
 end)
 
-App:set_hook(C.EEHOOK_RUNCOMMAND, OnRunningCommand)
+if #_console_commands > 0 then
+  App:set_hook(C.EEHOOK_RUNCOMMAND, OnRunningCommand)
+end
 App:set_hook(C.EEHOOK_APPMSG, OnAppMessage)
 App:set_hook(C.EEHOOK_PREEXECUTESCRIPT, OnPreExecuteScript)
 if #_plugin_commands > 0 then
