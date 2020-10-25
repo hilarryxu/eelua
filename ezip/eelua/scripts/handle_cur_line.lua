@@ -1,10 +1,10 @@
 local string = require"string"
 local path = require"minipath"
+local lfs = require"lfs"
 
 local str_fmt = string.format
 
 local dir_envir = "D:\\Mirserver\\Mir200\\Envir"
--- local dir_mirserver = [[E:\clear\Envir]]
 
 function trim(s)
   return s:match("^%s*(.-)%s*$")
@@ -23,12 +23,24 @@ if string.contains(fullpath, "Envir") then
   end
   dir_envir = table.concat(out, [[\]])
 end
+
+local function ensure_fn(fn, content)
+  fn = path.getabsolute(fn)
+  content = content or "\r\n"
+  if not lfs.exists_file(fn) then
+    io.writefile(fn, content)
+  end
+
+  return fn
+end
+
 local text = trim(doc:getline("."))
 local parts = string.explode(text, "[%s]+")
 if #parts >= 7 then
   local npc_fn = path.join(dir_envir, "Market_Def",
                            str_fmt("%s-%s.txt", parts[1], parts[2]))
   -- App:output_line(str_fmt("npc_fn: %s", npc_fn))
+  npc_fn = ensure_fn(npc_fn, "[@main]\r\n")
   App:open_doc(npc_fn, 936)
 elseif #parts >= 2 and parts[1]:upper() == "#CALL" then
   local script_name = parts[2]:sub(2, -2)
