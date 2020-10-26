@@ -1,4 +1,4 @@
-solution "sln-eelua"
+workspace "sln-eelua"
   configurations { "Release", "Debug" }
 
   project "eelua"
@@ -19,4 +19,4 @@ solution "sln-eelua"
       optimize "On"
 
     configuration { "gmake" }
-      linkoptions { "-static-libgcc" }
+      linkoptions { "-Wall -static-libgcc" }
