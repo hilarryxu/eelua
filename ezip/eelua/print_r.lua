@@ -6,8 +6,6 @@ local pairs = pairs
 local tostring = tostring
 local next = next
 
-local _p = eelua.dprint
-
 local function print_r(root)
 	local cache = {  [root] = "." }
 	local function _dump(t,space,name)
@@ -26,7 +24,7 @@ local function print_r(root)
 		end
 		return tconcat(temp,"\n"..space)
 	end
-	_p(_dump(root, "",""))
+	print(_dump(root, "",""))
 end
 
 return print_r
