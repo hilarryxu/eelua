@@ -121,10 +121,7 @@ eelua.add_console_command {
 ---
 local eeluarc_fpath = path.join(eelua.app_path, [[eelua\eeluarc.lua]])
 if lfs.exists_file(eeluarc_fpath) then
-  local ok, errmsg = pcall(dofile, eeluarc_fpath)
-  if not ok then
-    err("ERR: load eeluarc.lua: %s", errmsg)
-  end
+  dofile(eeluarc_fpath)
 end
 
 
@@ -134,11 +131,7 @@ end
 local plugins_dir = path.join(eelua.app_path, [[eelua\plugins]])
 for _, v in ipairs(lfs.list_dir(plugins_dir, "file")) do
   if v:endswith(".lua") then
-    local fn = path.join(plugins_dir, v)
-    local ok, errmsg = pcall(dofile, fn)
-    if not ok then
-      err("ERR: LoadPlugin: %s", errmsg)
-    end
+    dofile(path.join(plugins_dir, v))
   end
 end
 

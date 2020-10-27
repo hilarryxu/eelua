@@ -48,5 +48,5 @@ ReportLuaWarn(const char *msg)
 void
 ReportLuaError(const char *msg)
 {
-    MessageBoxA(NULL, msg, NULL, MB_OK);
+    MessageBoxA(NULL, msg, "[eelua] Error", MB_OK|MB_ICONERROR);
 }

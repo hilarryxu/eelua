@@ -12,6 +12,7 @@
 
 #include "util.h"
 #include "eelua.h"
+#include "lua_helper.h"
 
 #define LOG_TAG     "eelua_plugin"
 
@@ -19,18 +20,10 @@ EE_Context *g_ee_context = NULL;
 HMODULE g_ee_module = NULL;
 lua_State *g_lua_vm = NULL;
 
-
 static int
 run_eelua_init(lua_State *L)
 {
-    char fn[] = "./eelua/eelua_init.lua";
-    int rc = luaL_dofile(L, fn);
-    if (rc != 0) {
-        const char *msg = lua_tostring(L, -1);
-        ReportLuaWarn(msg);
-        lua_pop(L, 1);
-    }
-    return rc;
+    return luaH_dofile(L, "./eelua/eelua_init.lua");
 }
 
 
@@ -80,10 +73,10 @@ dofile(EE_Context *context, LPRECT rect, const wchar_t *text)
     lua_pushlightuserdata(L, context);
     lua_pushlightuserdata(L, rect);
     lua_pushlightuserdata(L, (void *) text);
-    int rc = lua_pcall(L, 3, 0, 0);
-    if (rc != 0) {
+    int rc = luaH_docall(L, 3, 0, NULL);
+    if (rc != LUA_OK) {
         const char *msg = lua_tostring(L, -1);
-        ReportLuaWarn(msg);
+        ReportLuaError(msg);
         lua_pop(L, 1);
     }
     return 0;

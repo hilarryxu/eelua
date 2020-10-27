@@ -13,8 +13,7 @@
 
 #define LOG_TAG     "eelua"
 
-
-int
+static int
 Leelua_dprint(lua_State *L)
 {
     const char *msg = luaL_checkstring(L, 1);
