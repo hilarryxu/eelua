@@ -190,7 +190,7 @@ typedef struct tagLVITEMA {
   int iGroup;
 } LVITEMA;
 
-typedef int (*pfnOnRunningCommand)(const wchar_t* command, int length);
+typedef LONG_PTR (*pfn_OnRunningCommand)(const wchar_t* command, LONG_PTR length);
 typedef int (*pfnOnAppMessage)(UINT uMsg, WPARAM wp, LPARAM lp);
 typedef int (*pfnOnPreExecuteScript)(const wchar_t* pathname);
 typedef int (*pfnOnListPluginCommand)(HWND hwnd);

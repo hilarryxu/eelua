@@ -183,8 +183,8 @@ OnDoFile = function(ctx, rect, wtext)
   end
 end
 
-OnRunningCommand = ffi_cast("pfnOnRunningCommand", function(wcommand, wlen)
-  local command = unicode.w2a(wcommand, wlen)
+OnRunningCommand = ffi_cast("pfn_OnRunningCommand", function(wcommand, wlen)
+  local command = unicode.w2a(wcommand, tonumber(wlen))
   local name, cmdline = command
   local space_idx = command:find(" ", 1, true)
   if space_idx then
