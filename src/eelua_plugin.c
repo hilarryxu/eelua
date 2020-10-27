@@ -23,7 +23,25 @@ lua_State *g_lua_vm = NULL;
 static int
 run_eelua_init(lua_State *L)
 {
-    return luaH_dofile(L, "./eelua/eelua_init.lua");
+    char *p = NULL;
+    char buf[PATH_MAX] = { 0 };
+    const char fpath[] = "\\eelua\\eelua_init.lua";
+
+    memset(buf, '\0', sizeof(buf));
+    DWORD ncopy = GetModuleFileNameA(g_ee_context->hModule, buf, MAX_PATH);
+    if (ncopy > 0) {
+        p = strrchr(buf, '\\');
+        if (p != NULL) {
+            strcpy(p, fpath);
+            *(p + sizeof(fpath) - 1) = '\0';
+        }
+    }
+
+    if (p != NULL) {
+        return luaH_dofile(L, buf);
+    } else {
+        return luaH_dofile(L, "./eelua/eelua_init.lua");
+    }
 }
 
 
