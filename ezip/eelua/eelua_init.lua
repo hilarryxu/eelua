@@ -4,6 +4,7 @@ package.path = package.path .. [[;.\eelua\?.lua]]
 local ffi = require "ffi"
 local string = require "string"
 local table = require "table"
+local io = require "io"
 local eelua = require "eelua"
 require "eelua.core"
 require "eelua.stdext"
@@ -122,6 +123,8 @@ eelua.add_console_command {
 local eeluarc_fpath = path.join(eelua.app_path, [[eelua\eeluarc.lua]])
 if lfs.exists_file(eeluarc_fpath) then
   dofile(eeluarc_fpath)
+else
+  io.writefile(eeluarc_fpath, "-- write your config here\r\n\r\n")
 end
 
 
@@ -148,7 +151,7 @@ for _, v in ipairs(lfs.list_dir(scripts_dir, "file")) do
     local cmd_id = App:next_cmd_id()
     script_menu:add_item(cmd_id, v)
     eelua.register_wm_command(cmd_id, {
-      type = "_script",
+      type = "script",
       script_path = path.join(scripts_dir, v)
     })
   end
@@ -161,9 +164,12 @@ eelua.plugin_menu:add_subitem("lua scripts", script_menu)
 ---
 OnDoFile = function(ctx, rect, wtext)
   local text = unicode.w2a(wtext, C.lstrlenW(wtext))
-  local params = string.explode(text, "^^", true)
+  local params = string.explode(text, _G.dofile_param_sep or "^^", true)
   local nparams = #params
-  assert(nparams > 0)
+  if nparams == 0 then
+    err("ERR: OnDoFile: no script file arg")
+    return
+  end
 
   local filepath = path.join(eelua.app_path, params[1])
   local ok, chunk = pcall(dofile, filepath)
@@ -208,7 +214,7 @@ OnAppMessage = ffi_cast("pfnOnAppMessage", function(msg, wparam, lparam)
     local cmd_info = _wm_commands[tostring(cmd_id)]
     if cmd_info then
       local cmd_type = cmd_info.type or "default"
-      if cmd_type == "_script" then
+      if cmd_type == "script" then
         local script_path = cmd_info.script_path
         if script_path then
           local ok, errmsg = pcall(dofile, script_path)
@@ -225,6 +231,7 @@ OnAppMessage = ffi_cast("pfnOnAppMessage", function(msg, wparam, lparam)
           end
         end
       end
+      return C.EEHOOK_RET_DONTROUTE
     end
   end
 
@@ -234,9 +241,9 @@ end)
 OnPreExecuteScript = ffi_cast("pfnOnPreExecuteScript", function(wpathname)
   local pathname = unicode.w2a(wpathname, C.lstrlenW(wpathname))
   if pathname:endswith(".lua") then
-    local ok, msg = pcall(dofile, pathname)
+    local ok, errmsg = pcall(dofile, pathname)
     if not ok then
-      err("ERR: OnPreExecuteScript: %s", msg)
+      err("ERR: OnPreExecuteScript: %s", errmsg)
     end
     return C.EEHOOK_RET_DONTROUTE
   end
