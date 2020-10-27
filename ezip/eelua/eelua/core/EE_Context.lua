@@ -1,10 +1,10 @@
-local ffi = require"ffi"
-local table = require"table"
-local eelua = require"eelua"
-local base = require"eelua.core.base"
-local EE_Document = require"eelua.core.EE_Document"
-local EE_Frame = require"eelua.core.EE_Frame"
-local unicode = require"unicode"
+local ffi = require "ffi"
+local table = require "table"
+local eelua = require "eelua"
+local base = require "eelua.core.base"
+local EE_Document = require "eelua.core.EE_Document"
+local EE_Frame = require "eelua.core.EE_Frame"
+local unicode = require "unicode"
 
 local C = ffi.C
 local ffi_new = ffi.new

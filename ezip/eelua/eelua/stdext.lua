@@ -1,11 +1,15 @@
-local string = require"string"
-local table = require"table"
-local io = require"io"
-local os = require"os"
+local string = require "string"
+local table = require "table"
+local io = require "io"
+local os = require "os"
 
 local tinsert = table.insert
 local str_fmt = string.format
 local unpack = unpack or table.unpack
+
+function string.trim(s)
+  return s:match("^%s*(.-)%s*$")
+end
 
 function string.startswith(haystack, needle)
   return haystack:find(needle, 1, true) == 1

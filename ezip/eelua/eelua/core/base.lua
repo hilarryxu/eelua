@@ -1,7 +1,7 @@
-local ffi = require"ffi"
-local string = require"string"
-local eelua = require"eelua"
-local unicode = require"unicode"
+local ffi = require "ffi"
+local string = require "string"
+local eelua = require "eelua"
+local unicode = require "unicode"
 
 local C = ffi.C
 local ffi_new = ffi.new
@@ -82,7 +82,7 @@ function _M.ptr2number(p)
   return tonumber(ffi_cast("intptr_t", p))
 end
 
-ffi.cdef[[
+ffi.cdef [[
 typedef uint8_t uchar;
 
 typedef void* HANDLE;

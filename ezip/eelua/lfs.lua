@@ -1,9 +1,10 @@
-local ffi = require"ffi"
-local bit = require"bit"
-local string = require"string"
-local table = require"table"
-local os = require"os"
-require"eelua.stdext"
+local ffi = require "ffi"
+local bit = require "bit"
+local string = require "string"
+local table = require "table"
+local os = require "os"
+require "eelua.stdext"
+local base = require "eelua.core.base"
 
 local C = ffi.C
 local ffi_new = ffi.new
@@ -13,7 +14,7 @@ local str_fmt = string.format
 local tinsert = table.insert
 local tconcat = table.concat
 
-ffi.cdef[[
+ffi.cdef [[
 uint32_t GetFileAttributesA(
   const char* lpFileName
 );
@@ -41,8 +42,8 @@ int GetCurrentDirectoryA(
 );
 
 typedef struct _FILETIME {
-    DWORD dwLowDateTime;
-    DWORD dwHighDateTime;
+  DWORD dwLowDateTime;
+  DWORD dwHighDateTime;
 } FILETIME;
 
 typedef struct _WIN32_FIND_DATAA {

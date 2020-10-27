@@ -6,8 +6,10 @@ local table = require "table"
 local ffi_new = ffi.new
 local ffi_str = ffi.string
 local ffi_cast = ffi.cast
-local is_luajit = pcall(require, 'jit')
+
+local is_luajit = pcall(require, "jit")
 local clib
+local consts = {}
 
 ---
 -- aux
@@ -47,6 +49,7 @@ local function init_mod(mod, opts)
   end
 
   clib = _M._load_clib(opts)
+  _M.C = clib
   _M._bind_clib()
   return mod
 end
@@ -60,8 +63,6 @@ function _M._load_clib(opts)
 end
 
 function _M._bind_clib()
-  local consts = {}
-
   _M.consts = consts
 
   consts.OK = 0
@@ -196,13 +197,13 @@ function _M._bind_clib()
   ]]
 
   function _M.open(filename)
-    local db_p = ffi_new('sqlite3*[1]')
+    local db_p = ffi_new("sqlite3*[1]")
     local rc = clib.sqlite3_open(filename, db_p)
     return rc, db_p[0]
   end
 
   function _M.open_v2(filename, flags, vfs)
-    local db_p = ffi_new('sqlite3*[1]')
+    local db_p = ffi_new("sqlite3*[1]")
     local rc = clib.sqlite3_open_v2(filename, db_p, flags, vfs)
     return rc, db_p[0]
   end
@@ -227,7 +228,7 @@ function _M._bind_clib()
 
   function _M.exec(db, sql, callback, arg1, errmsg)
     if errmsg == true then
-      local cstr = ffi_new('char*[1]')
+      local cstr = ffi_new("char*[1]")
       local rc = clib.sqlite3_exec(db, sql, callback, arg1, cstr)
       local errstr = aux.wrap_string(cstr[0])
       clib.sqlite3_free(cstr[0])
@@ -255,7 +256,7 @@ function _M._bind_clib()
   ]]
 
   function _M.prepare_v2(db, sql)
-    local pstmt = ffi.new('sqlite3_stmt*[1]')
+    local pstmt = ffi.new("sqlite3_stmt*[1]")
     local rc = clib.sqlite3_prepare_v2(db, sql, #sql + 1, pstmt, nil);
     if rc == consts.OK then
       return rc, pstmt[0]

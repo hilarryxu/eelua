@@ -1,5 +1,5 @@
-local table = require"table"
-require"eelua.stdext"
+local table = require "table"
+require "eelua.stdext"
 
 local tinsert = table.insert
 local tconcat = table.concat

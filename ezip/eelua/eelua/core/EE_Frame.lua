@@ -1,17 +1,17 @@
-local ffi = require"ffi"
-local eelua = require"eelua"
-local base = require"eelua.core.base"
-local unicode = require"unicode"
+local ffi = require "ffi"
+local eelua = require "eelua"
+local base = require "eelua.core.base"
+local unicode = require "unicode"
 
 local C = eelua.C
 local ffi_new = ffi.new
 local ffi_cast = ffi.cast
 local send_message = base.send_message
 
-ffi.cdef[[
-typedef struct {
-  HWND hwnd;
-} EE_Frame;
+ffi.cdef [[
+  typedef struct {
+    HWND hwnd;
+  } EE_Frame;
 ]]
 
 local _M = {}

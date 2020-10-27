@@ -1,40 +1,40 @@
-local ffi = require"ffi"
-local bit = require"bit"
-local eelua = require"eelua"
-local base = require"eelua.core.base"
-local unicode = require"unicode"
+local ffi = require "ffi"
+local bit = require "bit"
+local eelua = require "eelua"
+local base = require "eelua.core.base"
+local unicode = require "unicode"
 
 local C = ffi.C
 local ffi_new = ffi.new
 local ffi_cast = ffi.cast
 local send_message = base.send_message
 
-ffi.cdef[[
-typedef struct {
-  HMENU hmenu;
-} Menu;
+ffi.cdef [[
+  typedef struct {
+    HMENU hmenu;
+  } Menu;
 
-static const UINT MF_STRING = 0x00000000;
-static const UINT MF_SEPARATOR = 0x00000800;
-static const UINT MF_POPUP = 0x00000010;
-static const UINT MF_BYPOSITION = 0x00000400;
+  static const UINT MF_STRING = 0x00000000;
+  static const UINT MF_SEPARATOR = 0x00000800;
+  static const UINT MF_POPUP = 0x00000010;
+  static const UINT MF_BYPOSITION = 0x00000400;
 
-HMENU CreatePopupMenu();
-BOOL IsMenu(HMENU hMenu);
-int GetMenuItemCount(HMENU hMenu);
-BOOL AppendMenuA(
-  HMENU    hMenu,
-  UINT     uFlags,
-  UINT_PTR uIDNewItem,
-  const char*    lpNewItem
-);
-BOOL InsertMenuA(
-  HMENU    hMenu,
-  UINT     uPosition,
-  UINT     uFlags,
-  UINT_PTR uIDNewItem,
-  const char*   lpNewItem
-);
+  HMENU CreatePopupMenu();
+  BOOL IsMenu(HMENU hMenu);
+  int GetMenuItemCount(HMENU hMenu);
+  BOOL AppendMenuA(
+    HMENU    hMenu,
+    UINT     uFlags,
+    UINT_PTR uIDNewItem,
+    const char*    lpNewItem
+  );
+  BOOL InsertMenuA(
+    HMENU    hMenu,
+    UINT     uPosition,
+    UINT     uFlags,
+    UINT_PTR uIDNewItem,
+    const char*   lpNewItem
+  );
 ]]
 
 local _M = {}

@@ -1,4 +1,4 @@
-local ffi = require"ffi"
+local ffi = require "ffi"
 
 ffi.cdef[[
 int MultiByteToWideChar(unsigned int CodePage,
