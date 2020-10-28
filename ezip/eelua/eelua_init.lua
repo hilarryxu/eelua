@@ -178,8 +178,9 @@ OnDoFile = function(ctx, rect, wtext)
     return
   end
   if nparams > 1 then
-    local func = chunk(params[2])
-    func(unpack(select(3, unpack(params))))
+    local func = chunk[params[2]]
+    local func_args = { select(3, unpack(params)) }
+    func(unpack(func_args))
   end
 end
 
