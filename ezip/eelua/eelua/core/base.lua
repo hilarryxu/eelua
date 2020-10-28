@@ -191,11 +191,11 @@ typedef struct tagLVITEMA {
 } LVITEMA;
 
 typedef LONG_PTR (*pfn_OnRunningCommand)(const wchar_t* command, LONG_PTR length);
-typedef int (*pfnOnAppMessage)(UINT uMsg, WPARAM wp, LPARAM lp);
-typedef int (*pfnOnPreExecuteScript)(const wchar_t* pathname);
-typedef int (*pfnOnListPluginCommand)(HWND hwnd);
-typedef int (*pfnOnExecutePluginCommand)(const wchar_t* command);
-typedef int (*pfn_OnPrePopupTextMenu)(HWND doc, HMENU menu, int x, int y);
+typedef LONG_PTR (*pfn_OnAppMessage)(LONG_PTR uMsg, WPARAM wp, LPARAM lp);
+typedef LONG_PTR (*pfn_OnPreExecuteScript)(const wchar_t* pathname);
+typedef LONG_PTR (*pfn_OnListPluginCommand)(HWND hwnd);
+typedef LONG_PTR (*pfn_OnExecutePluginCommand)(const wchar_t* command);
+typedef LONG_PTR (*pfn_OnPrePopupTextMenu)(HWND doc, HMENU menu, LONG_PTR x, LONG_PTR y);
 
 static const int INT_MAX = 2147483647;
 static const int INT_MIN = -2147483648;

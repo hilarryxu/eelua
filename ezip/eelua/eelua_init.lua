@@ -204,7 +204,7 @@ OnRunningCommand = ffi_cast("pfn_OnRunningCommand", function(wcommand, wlen)
   return 0
 end)
 
-OnAppMessage = ffi_cast("pfnOnAppMessage", function(msg, wparam, lparam)
+OnAppMessage = ffi_cast("pfn_OnAppMessage", function(msg, wparam, lparam)
   if msg == C.WM_COMMAND then
     local cmd_id = tonumber(wparam)
     if cmd_id >= 65536 + 40000 then
@@ -238,7 +238,7 @@ OnAppMessage = ffi_cast("pfnOnAppMessage", function(msg, wparam, lparam)
   return 0
 end)
 
-OnPreExecuteScript = ffi_cast("pfnOnPreExecuteScript", function(wpathname)
+OnPreExecuteScript = ffi_cast("pfn_OnPreExecuteScript", function(wpathname)
   local pathname = unicode.w2a(wpathname, C.lstrlenW(wpathname))
   if pathname:endswith(".lua") then
     local ok, errmsg = pcall(dofile, pathname)
@@ -250,7 +250,7 @@ OnPreExecuteScript = ffi_cast("pfnOnPreExecuteScript", function(wpathname)
   return 0
 end)
 
-OnListPluginCommand = ffi_cast("pfnOnListPluginCommand", function(hwnd)
+OnListPluginCommand = ffi_cast("pfn_OnListPluginCommand", function(hwnd)
   local row = tonumber(base.send_message(hwnd, C.LVM_GETITEMCOUNT))
 
   for i, cmd in ipairs(_plugin_commands) do
@@ -283,7 +283,7 @@ OnListPluginCommand = ffi_cast("pfnOnListPluginCommand", function(hwnd)
   return 0
 end)
 
-OnExecutePluginCommand = ffi_cast("pfnOnExecutePluginCommand", function(wcommand)
+OnExecutePluginCommand = ffi_cast("pfn_OnExecutePluginCommand", function(wcommand)
   local command = unicode.w2a(wcommand, C.lstrlenW(wcommand))
   for i, cmd in ipairs(_plugin_commands) do
     if cmd.name == command then
