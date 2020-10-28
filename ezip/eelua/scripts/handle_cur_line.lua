@@ -32,6 +32,7 @@ local text = string.trim(doc:getline("."))
 local parts = string.explode(text, "[%s]+")
 if #parts >= 7 then
   -- 处理 MerChant.txt 中的 NPC 文件跳转（自动新建）
+  parts[1] = string.trim(parts[1]:gsub(";", ""))
   local npc_fn = path.join(dir_envir, "Market_Def",
                            str_fmt("%s-%s.txt", parts[1], parts[2]))
   npc_fn = ensure_fn(npc_fn, "[@main]\r\n\r\n")
@@ -39,6 +40,10 @@ if #parts >= 7 then
 elseif #parts >= 2 and string.contains(parts[1]:upper(), "#CALL") then
   -- 处理 #CALL 调用跳转（支持注释过的行）
   local script_name = parts[2]:sub(2, -2)
+  local script_fn = path.join(dir_envir, "QuestDiary", script_name)
+  App:open_doc(script_fn, CP_GB2312)
+elseif #parts >= 2 and string.contains(parts[1]:upper(), "NNDOLUASCRIPT") then
+  local script_name = parts[2]
   local script_fn = path.join(dir_envir, "QuestDiary", script_name)
   App:open_doc(script_fn, CP_GB2312)
 elseif #parts >= 2 then
