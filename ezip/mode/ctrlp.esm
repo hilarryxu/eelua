@@ -2,10 +2,10 @@
 Title=CtrlP
 [Menu0]
 Key=F5
-Command0=1,on_update,${AppPath}\plugin\eelua.dll,dofile,eelua\autoload\ctrlp\init.lua^^update
+Command0=1,update,${AppPath}\plugin\eelua.dll,dofile,eelua\autoload\ctrlp\init.lua^^update
 [Menu1]
 Key=A+Enter
 Command0=1,on_accept,${AppPath}\plugin\eelua.dll,dofile,eelua\autoload\ctrlp\init.lua^^on_accept
 [Menu2]
-Key=Enter
+Key=C+o
 Command0=1,on_accept,${AppPath}\plugin\eelua.dll,dofile,eelua\autoload\ctrlp\init.lua^^on_accept

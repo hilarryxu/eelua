@@ -6,5 +6,5 @@ Set ctrlp=CreateParser()
 ctrlp.AddItem(ctrlp.CreateItem(COLOR_NUMBER, "\b\d+\b", False))
 
 Set region_prompt_line=ctrlp.CreateRegion(COLOR_OPERATOR, "^\w+ >", "$", True)
-region_prompt_line.AddItem(ctrlp.CreateItem(COLOR_FOUND, "(?<= > )\w+", True))
+region_prompt_line.AddItem(ctrlp.CreateItem(COLOR_FOUND, "(?<= > ).*$", True))
 ctrlp.AddRegion(region_prompt_line)
