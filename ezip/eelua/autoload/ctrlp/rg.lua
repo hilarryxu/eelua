@@ -3,7 +3,7 @@ local lfs = require "lfs"
 local utils = require "autoload.ctrlp.utils"
 
 local _M = {
-  name = "files"
+  name = "rg"
 }
 
 function _M.run()
@@ -27,30 +27,49 @@ function _M.update(query, opts)
   local root = utils.find_root(nil, opts.prev_doc) or "."
   if query ~= "" then
     prompt_line = string.format("%s > %s", _M.name:upper(), query)
-    content = os.outputof(string.format([[rg --files "%s" | rg "%s"]], root, query))
+    local cmd = string.format("rg --vimgrep %s %s",
+                              utils.shellescape(query),
+                              utils.shellescape(root))
+    content = os.outputof(cmd)
   else
     prompt_line = string.format("%s > ", _M.name:upper())
-    content = os.outputof(string.format([[rg --files "%s"]], root))
+    content = ""
   end
-  content = unicode.A(content:gsub("\r\n", "\n"))
+  if content ~= "" then
+    content = unicode.A(content:gsub("\r\n", "\n"))
+  end
 
   local text = prompt_line .. "\n" .. content
   doc.text = text
-  doc:gotoline(1)
+  doc:gotoline(0)
   doc:send_command(6)  -- ECC_LINEEND
 end
 
 function _M.on_accept()
   local doc = App.active_doc
   local cursor = doc.cursor
-  local fpath
+  local s
   if cursor.line > 0 then
-    fpath = string.trim(doc:getline("."))
+    s = string.trim(doc:getline("."))
   else
-    fpath = string.trim(doc:getline(1))
+    s = string.trim(doc:getline(1))
   end
-  if lfs.exists_file(fpath) then
+
+  local init = 1
+  if s:sub(2, 2) == ":" then
+    init = 3
+  end
+  local fpath, line, col, _ = s:match("^([^:]+):(%d+):(%d+):", init)
+  if fpath and init == 3 then
+    fpath = s:sub(1, 2) .. fpath
+  end
+
+  if fpath and lfs.exists_file(fpath) then
     App:open_doc(fpath)
+    App.active_doc:set_cursor({
+      line = tonumber(line) - 1,
+      col = tonumber(col) - 1
+    }, true)
   end
 end
 

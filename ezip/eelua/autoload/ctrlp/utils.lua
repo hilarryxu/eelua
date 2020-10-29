@@ -6,6 +6,11 @@ local _M = {}
 local ctrlp_fpath = path.join(eelua.app_path, "_.__ctrlp__")
 local cached_root
 
+function _M.shellescape(s)
+  local v = string.format("%q", s)
+  return v:gsub([[\\]], [[\]])
+end
+
 function _M.open_doc()
   io.writefile(ctrlp_fpath, "")
   return App:open_doc(ctrlp_fpath)
@@ -83,14 +88,22 @@ function _M._find_root(mode, doc)
   return root
 end
 
-function _M.find_root(mode, doc)
+function _M.find_root(mode, prev_doc)
+  local check_cache = true
   local active_doc = App.active_doc
   if active_doc and active_doc.fullpath and string.contains(active_doc.fullpath, ".__ctrlp") then
-    if cached_root then
+    check_cache = true
+  end
+  if prev_doc then
+    check_cache = false
+  end
+
+  if check_cache then
+      if cached_root then
       return cached_root
     end
   end
-  cached_root = _M._find_root(mode, doc)
+  cached_root = _M._find_root(mode, prev_doc)
   return cached_root
 end
 

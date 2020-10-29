@@ -21,3 +21,11 @@ eelua.add_console_command {
     mod_files.run()
   end
 }
+
+eelua.add_console_command {
+  match = "^CtrlPRg$",
+  func = function(name, cmdline)
+    local mod = require("autoload.ctrlp.rg")
+    mod.run()
+  end
+}
