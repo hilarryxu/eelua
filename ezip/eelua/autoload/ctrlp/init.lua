@@ -9,7 +9,7 @@
 local _M = {}
 
 local function call_meth(meth_name, ...)
-  local mod_name = string.format("autoload.ctrlp.%s", _G.ctrlp_mod)
+  local mod_name = string.format("autoload.ctrlp.%s", ctrlp_cur_type or "default")
   local mod = require(mod_name)
   mod[meth_name](...)
 end

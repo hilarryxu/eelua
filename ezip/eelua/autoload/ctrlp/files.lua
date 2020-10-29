@@ -7,13 +7,15 @@ local _M = {
 }
 
 function _M.run()
-  _G.ctrlp_mod = _M.name
+  ctrlp_cur_type = _M.name
+  local prev_doc = App.active_doc
   utils.open_doc()
-  _M.update(nil, "")
+  _M.update("", { prev_doc = prev_doc })
 end
 
-function _M.update(doc, query)
-  doc = doc or App.active_doc
+function _M.update(query, opts)
+  opts = opts or {}
+  local doc = App.active_doc
   local query = query or doc:getline(".")
   local i, j = query:find("> ", 1, true)
   if j then
@@ -22,7 +24,7 @@ function _M.update(doc, query)
   local prompt_line
   local content
 
-  local root = utils.find_root() or "."
+  local root = utils.find_root(nil, opts.prev_doc) or "."
   if query ~= "" then
     prompt_line = string.format("%s > %s", _M.name:upper(), query)
     content = os.outputof(string.format([[rg --files "%s" | rg "%s"]], root, query))
