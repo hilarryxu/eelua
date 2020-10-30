@@ -37,6 +37,9 @@ if #parts >= 7 then
                            str_fmt("%s-%s.txt", parts[1], parts[2]))
   npc_fn = ensure_fn(npc_fn, "[@main]\r\n\r\n")
   App:open_doc(npc_fn, CP_GB2312)
+elseif #parts >= 2 and parts[1] == ";#include" then
+  local fn = path.join(dir_envir, "QuestDiary\\_include", parts[2])
+  App:open_doc(fn, CP_GB2312)
 elseif #parts >= 2 and string.contains(parts[1]:upper(), "#CALL") then
   -- 处理 #CALL 调用跳转（支持注释过的行）
   local script_name = parts[2]:sub(2, -2)

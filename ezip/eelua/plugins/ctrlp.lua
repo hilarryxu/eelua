@@ -1,3 +1,4 @@
+ctrlp_types = ctrlp_types or { "files", "rg" }
 ctrlp_max_results = ctrlp_max_results or 0
 ctrlp_regexp = ctrlp_regexp or 0
 ctrlp_working_path_mode = ctrlp_working_path_mode or "ra"

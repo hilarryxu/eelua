@@ -1,76 +1,34 @@
-local unicode = require "unicode"
 local lfs = require "lfs"
-local utils = require "autoload.ctrlp.utils"
+local ctrlp = require "autoload.ctrlp.init"
 
 local _M = {
-  name = "rg"
+  name = "rg",
+  type = "cmd",
+  cmd = "rg -E GB2312 --vimgrep -F $query $root",
+  must_has_query = true,
+  accept = function(opts)
+    local s = opts.items[1]
+    local init = 1
+    if s:sub(2, 2) == ":" then
+      init = 3
+    end
+    local fpath, line, col, _ = s:match("^([^:]+):(%d+):(%d+):", init)
+    if fpath and init == 3 then
+      fpath = s:sub(1, 2) .. fpath
+    end
+
+    if fpath and lfs.exists_file(fpath) then
+      App:open_doc(fpath)
+      App.active_doc:set_cursor({
+        line = tonumber(line) - 1,
+        col = tonumber(col) - 1
+      }, true)
+    end
+  end
 }
 
 function _M.run()
-  ctrlp_cur_type = _M.name
-  local prev_doc = App.active_doc
-  utils.open_doc()
-  _M.update("", { prev_doc = prev_doc })
-end
-
-function _M.update(query, opts)
-  opts = opts or {}
-  local doc = App.active_doc
-  local query = query or doc:getline(".")
-  local i, j = query:find("> ", 1, true)
-  if j then
-    query = query:sub(j + 1)
-  end
-  local prompt_line
-  local content
-
-  local root = utils.find_root(nil, opts.prev_doc) or "."
-  if query ~= "" then
-    prompt_line = string.format("%s > %s", _M.name:upper(), query)
-    local cmd = string.format("rg --vimgrep %s %s",
-                              utils.shellescape(query),
-                              utils.shellescape(root))
-    content = os.outputof(cmd)
-  else
-    prompt_line = string.format("%s > ", _M.name:upper())
-    content = ""
-  end
-  if content ~= "" then
-    content = unicode.A(content:gsub("\r\n", "\n"))
-  end
-
-  local text = prompt_line .. "\n" .. content
-  doc.text = text
-  doc:gotoline(0)
-  doc:send_command(6)  -- ECC_LINEEND
-end
-
-function _M.on_accept()
-  local doc = App.active_doc
-  local cursor = doc.cursor
-  local s
-  if cursor.line > 0 then
-    s = string.trim(doc:getline("."))
-  else
-    s = string.trim(doc:getline(1))
-  end
-
-  local init = 1
-  if s:sub(2, 2) == ":" then
-    init = 3
-  end
-  local fpath, line, col, _ = s:match("^([^:]+):(%d+):(%d+):", init)
-  if fpath and init == 3 then
-    fpath = s:sub(1, 2) .. fpath
-  end
-
-  if fpath and lfs.exists_file(fpath) then
-    App:open_doc(fpath)
-    App.active_doc:set_cursor({
-      line = tonumber(line) - 1,
-      col = tonumber(col) - 1
-    }, true)
-  end
+  ctrlp.run(_M)
 end
 
 if not ... then

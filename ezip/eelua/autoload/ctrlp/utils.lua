@@ -16,31 +16,24 @@ function _M.open_doc()
   return App:open_doc(ctrlp_fpath)
 end
 
-local function find_root_c(mode, doc)
-  if doc == nil then
-    return
-  end
-  local fpath = doc.fullpath or ""
-  if fpath == "" then
-    return
-  end
-  return path.getdirectory(path.getabsolute(fpath))
+local function find_root_c(mode, opts)
+  return opts.cur_file_dir
 end
 
-local function find_root_a(mode, doc)
-  local cur_file_dir = find_root_c(mode, doc)
+local function find_root_a(mode, opts)
+  local cur_file_dir = find_root_c(mode, opts)
   local cwd = lfs.currentdir()
   if not cur_file_dir then
     return cwd
   end
-  if string.contains(cur_file_dir, cwd) then
+  if cur_file_dir:contains(cwd) then
     return cwd
   end
   return cur_file_dir
 end
 
-local function find_root_r(mode, doc)
-  local cur_file_dir = find_root_c(mode, doc)
+local function find_root_r(mode, opts)
+  local cur_file_dir = find_root_c(mode, opts)
   if not cur_file_dir then
     return
   end
@@ -64,46 +57,32 @@ local function find_root_r(mode, doc)
   end
 end
 
-function _M._find_root(mode, doc)
+function _M._find_root(mode, opts)
   mode = mode or ctrlp_working_path_mode
-  local doc = doc or App.active_doc
-  if doc and doc.fullpath and string.contains(doc.fullpath, ".__ctrlp") then
-    doc = nil
-  end
 
   local root
   for i = 1, #mode do
     local ch = mode:sub(i, i)
     if ch == "r" then
-      root = find_root_r(mode, doc)
+      root = find_root_r(mode, opts)
       if root then return root end
     elseif ch == "a" then
-      root = find_root_a(mode, doc)
+      root = find_root_a(mode, opts)
       if root then return root end
     elseif ch == "c" then
-      root = find_root_c(mode, doc)
+      root = find_root_c(mode, opts)
       if root then return root end
     end
   end
   return root
 end
 
-function _M.find_root(mode, prev_doc)
-  local check_cache = true
-  local active_doc = App.active_doc
-  if active_doc and active_doc.fullpath and string.contains(active_doc.fullpath, ".__ctrlp") then
-    check_cache = true
-  end
-  if prev_doc then
-    check_cache = false
-  end
-
+function _M.find_root(opts)
+  local check_cache = opts.refresh == true and true or false
   if check_cache then
-      if cached_root then
-      return cached_root
-    end
+    if cached_root then return cached_root end
   end
-  cached_root = _M._find_root(mode, prev_doc)
+  cached_root = _M._find_root(opts.mode, opts)
   return cached_root
 end
 
