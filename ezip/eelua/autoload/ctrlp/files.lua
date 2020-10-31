@@ -4,7 +4,7 @@ local ctrlp = require "autoload.ctrlp.init"
 local _M = {
   name = "files",
   type = "cmd",
-  cmd = "rg --files $root",
+  cmd = ctrlp_user_command or "rg --files $root",
   accept = function(opts)
     local fpath = opts.items[1]
     if lfs.exists_file(fpath) then

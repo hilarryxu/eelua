@@ -4,7 +4,7 @@ local ctrlp = require "autoload.ctrlp.init"
 local _M = {
   name = "rg",
   type = "cmd",
-  cmd = "rg -E GB2312 --vimgrep -F $query $root",
+  cmd = ctrlp_rg_cmd or "rg -E GB2312 --vimgrep -F $query $root",
   must_has_query = true,
   accept = function(opts)
     local s = opts.items[1]
@@ -21,7 +21,8 @@ local _M = {
       App:open_doc(fpath)
       App.active_doc:set_cursor({
         line = tonumber(line) - 1,
-        col = tonumber(col) - 1
+        col = 0
+        -- col = tonumber(col) - 1
       }, true)
     end
   end

@@ -16,6 +16,14 @@ function _M.open_doc()
   return App:open_doc(ctrlp_fpath)
 end
 
+local function build_root_markers()
+  local out = { ".git" }
+  for _, v in ipairs(ctrlp_root_markers or {}) do
+    table.insert(out, v)
+  end
+  return out
+end
+
 local function find_root_c(mode, opts)
   return opts.cur_file_dir
 end
@@ -38,7 +46,7 @@ local function find_root_r(mode, opts)
     return
   end
 
-  local root_markers = { ".git" }
+  local root_markers = build_root_markers()
   local dir = cur_file_dir
   local depth = 1
   while depth < 100 do
