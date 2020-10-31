@@ -1,8 +1,6 @@
 local ffi = require "ffi"
 local bit = require "bit"
-local eelua = require "eelua"
 local base = require "eelua.core.base"
-local unicode = require "unicode"
 
 local C = ffi.C
 local ffi_new = ffi.new

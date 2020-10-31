@@ -1,9 +1,7 @@
 local ffi = require "ffi"
-local eelua = require "eelua"
 local base = require "eelua.core.base"
-local unicode = require "unicode"
 
-local C = eelua.C
+local C = ffi.C
 local ffi_new = ffi.new
 local ffi_cast = ffi.cast
 local send_message = base.send_message

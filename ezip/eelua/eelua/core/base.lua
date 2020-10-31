@@ -33,7 +33,6 @@ end
 
 local _M = new_tab(0, 20)
 
-_M.version = "0.1.0"
 _M.new_tab = new_tab
 _M.clear_tab = clear_tab
 

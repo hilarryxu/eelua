@@ -15,6 +15,10 @@ local function ensure_fn(fn, content)
   fn = path.getabsolute(fn)
   content = content or "\r\n"
   if not lfs.exists_file(fn) then
+    local parent_dir = path.getdirectory(fn)
+    if not lfs.exists_dir(parent_dir) then
+      lfs.mkdir(parent_dir)
+    end
     io.writefile(fn, content)
   end
   return fn
@@ -28,7 +32,7 @@ if j then
   dir_envir = path.getabsolute(fullpath:sub(1, j))
 end
 
-local text = string.trim(doc:getline("."))
+local text = doc:getline("."):trim()
 local parts = string.explode(text, "[%s]+")
 if #parts >= 7 then
   -- 处理 MerChant.txt 中的 NPC 文件跳转（自动新建）
@@ -39,16 +43,19 @@ if #parts >= 7 then
   App:open_doc(npc_fn, CP_GB2312)
 elseif #parts >= 2 and parts[1] == ";#include" then
   local fn = path.join(dir_envir, "QuestDiary\\_include", parts[2])
+  fn = ensure_fn(fn)
   App:open_doc(fn, CP_GB2312)
 elseif #parts >= 2 and string.contains(parts[1]:upper(), "#CALL") then
   -- 处理 #CALL 调用跳转（支持注释过的行）
   local script_name = parts[2]:sub(2, -2)
-  local script_fn = path.join(dir_envir, "QuestDiary", script_name)
-  App:open_doc(script_fn, CP_GB2312)
+  local fn = path.join(dir_envir, "QuestDiary", script_name)
+  fn = ensure_fn(fn)
+  App:open_doc(fn, CP_GB2312)
 elseif #parts >= 2 and string.contains(parts[1]:upper(), "NNDOLUASCRIPT") then
   local script_name = parts[2]
-  local script_fn = path.join(dir_envir, "QuestDiary", script_name)
-  App:open_doc(script_fn, CP_GB2312)
+  local fn = path.join(dir_envir, "QuestDiary", script_name)
+  fn = ensure_fn(fn)
+  App:open_doc(fn, CP_GB2312)
 elseif #parts >= 2 then
   -- 处理 QuestDiary 下文件引用跳转
   for _, val in ipairs(parts) do

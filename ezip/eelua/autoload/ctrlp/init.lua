@@ -115,6 +115,7 @@ function _M.run(opts, extra_opts)
   doc.text = text
   doc:gotoline(1)
   doc:send_command(6)  -- ECC_LINEEND
+  App:send_command(57603)  -- Save
 end
 
 function _M.toggle_type(step)

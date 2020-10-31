@@ -1,6 +1,5 @@
 local ffi = require "ffi"
 local table = require "table"
-local eelua = require "eelua"
 local base = require "eelua.core.base"
 local EE_Document = require "eelua.core.EE_Document"
 local EE_Frame = require "eelua.core.EE_Frame"
@@ -30,6 +29,10 @@ local mt = {
   end
 }
 
+function _M:send_command(wparam, lparam)
+  return C.SendMessageA(self.hMain, C.WM_COMMAND, wparam or 0, lparam or 0)
+end
+
 function _M:send_message(msg, wparam, lparam)
   return C.SendMessageA(self.hMain, msg, wparam or 0, lparam or 0)
 end
@@ -48,7 +51,17 @@ function _M:open_doc(filepath, codepage, view_type)
   p[0].nCodepage = codepage or C.CODEPAGE_AUTO
   p[0].nViewType = view_type or C.VIEWTYPE_TEXT
   local hwnd = ffi_cast("HWND", send_message(self.hMain, C.EEM_LOADFILE, unicode.a2w(filepath), p))
-  return EE_Document.new(hwnd)
+  local doc = _M.get_doc_from_frame(self, hwnd)
+  return doc
+end
+
+function _M:new_doc()
+  _M.send_command(self, 57600)  -- New text doc
+  return _M:get_active_doc(self)
+end
+
+function _M:save()
+  _M.send_command(self, 57603)  -- Save
 end
 
 function _M:output_text(text)

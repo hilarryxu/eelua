@@ -1,9 +1,8 @@
 local ffi = require "ffi"
-local eelua = require "eelua"
 local base = require "eelua.core.base"
 local unicode = require "unicode"
 
-local C = eelua.C
+local C = ffi.C
 local ffi_new = ffi.new
 local ffi_cast = ffi.cast
 local send_message = base.send_message
@@ -166,7 +165,10 @@ function _M:insert_at(line, col, text)
   send_message(self.hwnd, C.ECM_INSERTTEXT, pos_ptr, insert_text_ptr)
 end
 
-function _M:gotoline(line)
+function _M:gotoline(line, base0)
+  if base0 then
+    line = line + 1
+  end
   send_message(self.hwnd, C.ECM_JUMPTOLINE, line)
 end
 
