@@ -1,8 +1,8 @@
 local package = require "package"
-package.path = package.path .. [[;.\eelua\?.lua]]
+local string = require "string"
+package.path = package.path .. string.format([[;%s\eelua\?.lua]], package.exedir or ".")
 
 local ffi = require "ffi"
-local string = require "string"
 local table = require "table"
 local io = require "io"
 local eelua = require "eelua"
