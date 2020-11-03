@@ -10,9 +10,9 @@
 
 #include "eesdk.h"
 
-#define EELUA_VERSION       "eelua 0.4"
-#define EELUA_RELEASE       "eelua 0.4.0"
-#define EELUA_VERSION_NUM   4  // (maj) * 1000) + min
+#define EELUA_VERSION       "eelua 0.5"
+#define EELUA_RELEASE       "eelua 0.5.0"
+#define EELUA_VERSION_NUM   5  // (maj) * 1000) + min
 
 #ifdef _MSC_VER
 #define snprintf  _snprintf
